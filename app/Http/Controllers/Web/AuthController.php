@@ -12,9 +12,12 @@ class AuthController extends Controller
     {
         $instituteCode = $request->route('institute');
         $institute = Institute::with('configuration')
-            ->where('code', $instituteCode)
-            ->where('status', '1')
+            ->where('code',  $request->route('institute'))
             ->firstOrFail();
+            
+        if (!$institute->status) {
+            return response()->view('errors.institute-inactive', [], 403);
+        }    
         $configuration = $institute->configuration;
         if ($configuration?->login_logo) {
             $instituteLogo = asset(

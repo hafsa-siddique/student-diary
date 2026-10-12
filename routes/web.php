@@ -3,9 +3,17 @@
 use App\Http\Controllers\Web\AuthController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
+
+Route::view('/studentdiary', 'auth.super-admin-login')
+    ->name('super-admin-login');    
+Route::view('/super-admin/dashboard', 'super-admin.dashboard')
+    ->name('super-admin.dashboard');
+Route::view('/super-admin/institutes', 'super-admin.institutes.index')
+    ->name('super-admin.institutes');
 
 Route::get('/login/{institute}', [AuthController::class, 'showInstituteLogin'])
     ->name('institute.login');

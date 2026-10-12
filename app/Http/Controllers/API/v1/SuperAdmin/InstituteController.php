@@ -12,14 +12,32 @@ class InstituteController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $institutes = Institute::paginate(5);
+        $institutes = Institute::query()
+            ->when($request->filled('search'), fn($q) => $q->where(function ($q) use ($request) {
+                $search = $request->search;
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhere('code', 'like', "%{$search}%");
+            }))
+            ->latest()
+            ->paginate($request->filled('search') ? 10 : 5);
         return response()->json([
             'status' => true,
             'message' => 'Institutes retrieved successfully.',
+            'statistics' => [
+                'total' => Institute::count(),
+                'active' => Institute::where('status', '1')->count(),
+                'inactive' => Institute::where('status', '0')->count(),
+            ],
             'data' => InstituteResource::collection($institutes),
-        ],200);
+            'pagination' => [
+                'current_page' => $institutes->currentPage(),
+                'last_page' => $institutes->lastPage(),
+                'per_page' => $institutes->perPage(),
+                'total' => $institutes->total(),
+            ],
+        ]);
     }
 
     public function store(Request $request)
