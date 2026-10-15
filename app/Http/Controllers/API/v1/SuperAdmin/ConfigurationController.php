@@ -33,6 +33,7 @@ class ConfigurationController extends Controller
             'small_logo' => 'nullable|string|max:255',
             'login_logo' => 'nullable|string|max:255',
             'favicon' => 'nullable|string|max:255',
+            'login_layout' => 'nullable|in:layout_one,layout_two',
             'primary_color' => 'nullable|string|max:20',
             'secondary_color' => 'nullable|string|max:20',
             'contact_email' => 'nullable|email|max:255',
@@ -40,6 +41,15 @@ class ConfigurationController extends Controller
             'address' => 'nullable|string|max:500',
             'website' => 'nullable|url|max:255',
         ]);
+        $logoFields = ['main_logo', 'small_logo', 'login_logo', 'login_cover_image', 'favicon'];
+        foreach ($logoFields as $field) {
+            if ($request->hasFile($field)) {
+                $path = $request->file($field)->store('images', 'public');
+                $validatedData[$field] = $path;
+            } else {
+                unset($validatedData[$field]);
+            }
+        }
         $configuration = $institute->configuration()->updateOrCreate(
             [
                 'institute_id' => $institute->id,

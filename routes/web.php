@@ -14,6 +14,11 @@ Route::view('/super-admin/dashboard', 'super-admin.dashboard')
     ->name('super-admin.dashboard');
 Route::view('/super-admin/institutes', 'super-admin.institutes.index')
     ->name('super-admin.institutes');
+Route::get('/super-admin/institutes/{id}/view', function ($id) {
+    return view('super-admin.institutes.view', ['id' => $id]);
+});    
+Route::view('/super-admin/settings', 'super-admin.settings')
+    ->name('super-admin.settings');
 
 Route::get('/login/{institute}', [AuthController::class, 'showInstituteLogin'])
     ->name('institute.login');

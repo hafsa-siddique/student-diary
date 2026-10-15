@@ -65,7 +65,7 @@
 </section>
 
 <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white xl:col-span-2">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white xl:col-span-2 mb-6">
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:px-6">
             <div>
                 <h3 class="font-bold text-slate-800">Institute Management</h3>
@@ -79,10 +79,10 @@
             <table class="w-full min-w-[540px] text-left text-sm">
                 <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
                     <tr>
-                        <th class="px-6 py-4 font-semibold">Institute</th>
-                        <th class="px-6 py-4 font-semibold">Code</th>
-                        <th class="px-6 py-4 font-semibold">Status</th>
-                        <th class="px-6 py-4 text-center font-semibold">Action</th>
+                        <th class="px-6 py-2 font-semibold">Institute</th>
+                        <th class="px-6 py-2 font-semibold">Code</th>
+                        <th class="px-6 py-2 font-semibold">Status</th>
+                        <th class="px-6 py-2 text-center font-semibold">Action</th>
                     </tr>
                 </thead>
                 <tbody id="instituteTable">
@@ -92,7 +92,7 @@
         </div>
     </div>
 
-    <div class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 mb-6">
         <h3 class="font-bold text-slate-800">Quick Actions</h3>
         <p class="mt-1 text-sm text-slate-500">Common platform tasks.</p>
         <div class="mt-5 space-y-3">
@@ -160,18 +160,18 @@ async function loadInstituteStats() {
 
         result.data.forEach(institute => {
             const row = document.createElement('tr');
-            row.className = 'border-t border-slate-100';
+            row.className = 'border-t border-slate-300';
 
             [institute.name, institute.code].forEach(value => {
                 const cell = document.createElement('td');
-                cell.className = 'px-6 py-4 text-slate-700';
+                cell.className = 'px-6 py-2 text-slate-700';
                 cell.textContent = value ?? '—';
                 row.appendChild(cell);
             });
 
             const isActive = isInstituteActive(institute.status);
             const statusCell = document.createElement('td');
-            statusCell.className = 'px-6 py-4';
+            statusCell.className = 'px-6 py-2';
 
             const badge = document.createElement('span');
             badge.className = `rounded-full px-3 py-1 text-xs font-semibold ${isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-orange-50 text-orange-700'}`;
@@ -180,7 +180,7 @@ async function loadInstituteStats() {
             row.appendChild(statusCell);
 
             const actionCell = document.createElement('td');
-            actionCell.className = 'px-6 py-4 text-center';
+            actionCell.className = 'px-6 py-2 text-center';
 
             const viewButton = document.createElement('a');
             viewButton.href = `/super-admin/institutes/${encodeURIComponent(institute.id)}/view`;

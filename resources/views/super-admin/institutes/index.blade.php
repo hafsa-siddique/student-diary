@@ -60,19 +60,19 @@
                 <h3 class="font-bold text-slate-800">All Institutes</h3>
                 <p id="instituteCount" class="mt-1 text-sm text-slate-500">Loading institutes...</p>
             </div>
-            <a href="" class="inline-flex items-center gap-1 rounded-lg bg-secondary/85 px-4 py-1 text-sm font-semibold text-primary transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+            <button type="button" onclick="openAddInstituteModal()" class="inline-flex items-center gap-1 rounded-lg bg-secondary/85 px-4 py-1 text-sm font-semibold text-primary transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
                 <span class="material-symbols-rounded text-lg">add</span> Add Institute
-            </a>
+            </button>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full min-w-[650px] text-left text-sm">
                 <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
                     <tr>
-                        <th class="px-6 py-4 font-semibold">Institute</th>
-                        <th class="px-6 py-4 font-semibold">Code</th>
-                        <th class="px-6 py-4 font-semibold">Status</th>
-                        <th class="px-6 py-4 text-center font-semibold">Action</th>
+                        <th class="px-6 py-2 font-semibold">Institute</th>
+                        <th class="px-6 py-2 font-semibold">Code</th>
+                        <th class="px-6 py-2 font-semibold">Status</th>
+                        <th class="px-6 py-2 text-center font-semibold">Action</th>
                     </tr>
                 </thead>
                 <tbody id="instituteTable">
@@ -90,6 +90,64 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Add Institute Modal -->
+<div id="addInstituteModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+    <div class="relative w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl border border-slate-200">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+            <h3 class="font-bold text-slate-800 text-lg">Add New Institute</h3>
+            <button type="button" onclick="closeAddInstituteModal()" class="rounded-lg p-1 text-slate-400 hover:bg-slate-100 transition">
+                <span class="material-symbols-rounded">close</span>
+            </button>
+        </div>
+
+        <form id="addInstituteForm" onsubmit="submitNewInstitute(event)" class="space-y-4">
+            <!-- Section 1: Institute Information -->
+            <div class="space-y-3">
+                <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Institute Info</h4>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Institute Name *</label>
+                        <input type="text" id="add_inst_name" required placeholder="e.g. Beaconhouse Campus" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-primary focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Institute Code *</label>
+                        <input type="text" id="add_inst_code" required placeholder="e.g. BHC-01" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-primary focus:outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Administrator Account -->
+            <div class="space-y-3 pt-2">
+                <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Institute Admin Account</h4>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Admin Name *</label>
+                        <input type="text" id="add_admin_name" required placeholder="Full Name" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-primary focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Admin Email *</label>
+                        <input type="email" id="add_admin_email" required placeholder="admin@institute.com" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-primary focus:outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Admin Password *</label>
+                    <input type="password" id="add_admin_password" required placeholder="Minimum 8 characters" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-primary focus:outline-none">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
+                <button type="button" onclick="closeAddInstituteModal()" class="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">Cancel</button>
+                <button type="submit" class="rounded-xl bg-primary px-5 py-2 text-xs font-semibold text-white shadow-sm hover:brightness-110 transition">Create Institute</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="toastNotification" class="fixed bottom-5 right-5 z-50 hidden transform translate-y-2 opacity-0 transition-all duration-300 flex items-center gap-3 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl border border-slate-700">
+    <span id="toastIcon" class="material-symbols-rounded text-emerald-400 text-xl">check_circle</span>
+    <p id="toastMessage" class="text-sm font-medium">Institute Saved successfully!</p>
 </div>
 
 <script>
@@ -110,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         table.innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-slate-500">Loading institutes...</td></tr>';
 
         try {
-            const response = await fetch(`/api/v1/super-admin/institutes?per_page=10&page=${page}`, {
+            const response = await fetch(`/api/v1/super-admin/institutes?per_page=5&page=${page}`, {
                 headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
             });
 
@@ -141,11 +199,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             result.data.forEach(institute => {
                 const row = document.createElement('tr');
-                row.className = 'border-t border-slate-100 transition-colors hover:bg-slate-50/70';
+                row.className = 'border-t border-slate-300 transition-colors hover:bg-slate-50/70';
 
                 [institute.name, institute.code].forEach(value => {
                     const cell = document.createElement('td');
-                    cell.className = 'px-6 py-4 text-slate-700';
+                    cell.className = 'px-6 py-2 text-slate-700';
                     cell.textContent = value ?? '—';
                     row.appendChild(cell);
                 });
@@ -155,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
 
                 const statusCell = document.createElement('td');
-                statusCell.className = 'px-6 py-4';
+                statusCell.className = 'px-6 py-2';
                 const badge = document.createElement('span');
                 badge.className = `rounded-full px-3 py-1 text-xs font-semibold ${isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-orange-50 text-orange-700'}`;
                 badge.textContent = isActive ? 'Active' : 'Inactive';
@@ -163,10 +221,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 row.appendChild(statusCell);
 
                 const actionCell = document.createElement('td');
-                actionCell.className = 'px-6 py-4 text-center';
+                actionCell.className = 'px-6 py-2 text-center';
 
                 const viewButton = document.createElement('a');
-                viewButton.href = `/super-admin/institutes/${encodeURIComponent(institute.id)}`;
+                viewButton.href = `/super-admin/institutes/${encodeURIComponent(institute.id)}/view`;
                 viewButton.className = 'inline-flex items-center rounded-lg p-2 text-slate-600 transition hover:text-secondary';
                 viewButton.title = 'View institute';
                 viewButton.setAttribute('aria-label', `View ${institute.name}`);
@@ -223,5 +281,68 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+function openAddInstituteModal() {
+    document.getElementById('addInstituteForm').reset();
+    document.getElementById('addInstituteModal').classList.remove('hidden');
+}
+
+function closeAddInstituteModal() {
+    document.getElementById('addInstituteModal').classList.add('hidden');
+}
+async function submitNewInstitute(e) {
+    e.preventDefault();
+    const token = localStorage.getItem('student_diary_token');
+
+    const payload = {
+        name: document.getElementById('add_inst_name').value,
+        code: document.getElementById('add_inst_code').value,
+        admin_name: document.getElementById('add_admin_name').value,
+        admin_email: document.getElementById('add_admin_email').value,
+        admin_password: document.getElementById('add_admin_password').value,
+    };
+
+    try {
+        const response = await fetch('/api/v1/super-admin/institutes/complete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Failed to create institute.');
+
+        showToast('Institute and admin created successfully!');
+        closeAddInstituteModal();
+        
+        if (typeof fetchInstitutesList === 'function') fetchInstitutesList();
+    } catch (error) {
+        showToast(error.message, true);
+    }
+}
+function showToast(message, isError = false) {
+    const toast = document.getElementById('toastNotification');
+    const msgEl = document.getElementById('toastMessage');
+    const iconEl = document.getElementById('toastIcon');
+
+    msgEl.textContent = message;
+    if (isError) {
+        iconEl.textContent = 'error';
+        iconEl.className = 'material-symbols-rounded text-red-400 text-xl';
+        toast.className = 'fixed bottom-5 right-5 z-50 transform translate-y-0 opacity-100 transition-all duration-300 flex items-center gap-3 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl border border-red-500/50';
+    } else {
+        iconEl.textContent = 'check_circle';
+        iconEl.className = 'material-symbols-rounded text-emerald-400 text-xl';
+        toast.className = 'fixed bottom-5 right-5 z-50 transform translate-y-0 opacity-100 transition-all duration-300 flex items-center gap-3 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl border border-slate-700';
+    }
+
+    // Auto-hide after 3.5 seconds
+    setTimeout(() => {
+        toast.className = 'fixed bottom-5 right-5 z-50 hidden transform translate-y-2 opacity-0 transition-all duration-300 flex items-center gap-3 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl border border-slate-700';
+    }, 3500);
+}
 </script>
 @endsection

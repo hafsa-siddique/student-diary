@@ -17,6 +17,7 @@ use App\Http\Controllers\API\v1\Parent\DiaryController;
 use App\Http\Controllers\API\v1\Parent\ParentController as ParentParentController;
 use App\Http\Controllers\API\v1\SuperAdmin\ConfigurationController;
 use App\Http\Controllers\API\v1\SuperAdmin\InstituteController;
+use App\Http\Controllers\API\v1\SuperAdmin\PlatformSettingController;
 use App\Http\Controllers\API\v1\Teacher\DiaryAttachmentController;
 use App\Http\Controllers\API\v1\Teacher\DiaryEntryController;
 use App\Http\Controllers\API\v1\Teacher\TeacherController as TeacherTeacherController;
@@ -37,6 +38,7 @@ Route::prefix('v1')->group(function (){
     });
 
     Route::middleware(['auth:sanctum','role:super_admin'])->group(function (){
+        Route::post('super-admin/institutes/complete', [InstituteController::class, 'storeInstituteWithAdmin']);
         Route::apiResource('super-admin/institutes',InstituteController::class);
         Route::patch('super-admin/institutes/{institute}/status',[InstituteController::class,'updateStatus']);
         Route::get('super-admin/institutes/{institute}/configuration',[ConfigurationController::class,'show']);
@@ -45,6 +47,8 @@ Route::prefix('v1')->group(function (){
         Route::post('super-admin/institutes/{institute}/admin',[InstituteAdminController::class,'store']);
         Route::put('super-admin/institutes/{institute}/admin',[InstituteAdminController::class,'update']);
         Route::patch('super-admin/institutes/{institute}/admin/status',[InstituteAdminController::class,'updateStatus']);
+        Route::get('/settings',[PlatformSettingController::class,'index']);
+        Route::post('/settings',[PlatformSettingController::class,'update']);
 
         // Route::get('/super-admin/test', function (Request $request) {
         //     return response()->json([

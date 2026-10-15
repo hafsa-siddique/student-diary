@@ -13,6 +13,7 @@ class Configuration extends Model
         'small_logo',
         'login_logo',
         'favicon',
+        'login_layout',
         'primary_color',
         'secondary_color',
         'contact_email',

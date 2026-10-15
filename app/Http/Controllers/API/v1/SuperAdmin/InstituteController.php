@@ -4,8 +4,12 @@ namespace App\Http\Controllers\API\v1\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\InstituteResource;
+use App\Models\Configuration;
 use App\Models\Institute;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class InstituteController extends Controller
 {
@@ -21,7 +25,7 @@ class InstituteController extends Controller
                 ->orWhere('code', 'like', "%{$search}%");
             }))
             ->latest()
-            ->paginate($request->filled('search') ? 10 : 5);
+            ->paginate($request->input('per_page', 5));
         return response()->json([
             'status' => true,
             'message' => 'Institutes retrieved successfully.',
@@ -121,5 +125,55 @@ class InstituteController extends Controller
                 : 'Institute deactivated successfully.',
             'data' => new InstituteResource($institute),
         ], 200);
+    }
+    public function storeInstituteWithAdmin(Request $request) 
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'code' => 'required|string|unique:institutes,code',
+            'status' => 'sometimes|boolean',
+            'admin_name' => 'required|string|regex:/^[A-Za-z ]+$/|max:255',
+            'admin_email' => 'required|email|unique:users,email',
+            'admin_password' => 'required|string|min:8',
+        ]);
+        $result = DB::transaction(function () use ($request) {
+            // Create Institute
+            $institute = Institute::create([
+                'name' => $request->name,
+                'code' => strtoupper($request->code),
+                'status' => $request->status ?? 1,
+            ]);
+            $admin = User::create([
+                'institute_id' => $institute->id,
+                'name' => $request->admin_name,
+                'email' => $request->admin_email,
+                'password' => Hash::make($request->admin_password),
+                'role' => 'admin',
+                'status' => 1,
+            ]);
+
+            Configuration::create([
+                'institute_id' => $institute->id,
+                'contact_email' => $request->admin_email,
+                'contact_phone' => null,
+                'address' => null,
+                'website' => null,
+                'primary_color' => '#166534', 
+                'secondary_color' => '#84CC16', 
+                'main_logo' => null,
+                'small_logo' => null,
+                'login_logo' => null,
+                'login_cover_image' => null,
+                'favicon' => null,
+            ]);
+
+            return $institute;
+        });
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Institute, admin, and configurations created successfully',
+            'data' => new InstituteResource($result)
+        ], 201);
     }
 }

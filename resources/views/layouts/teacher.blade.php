@@ -351,11 +351,11 @@
             </div>
             <div class="flex items-center gap-space-lg">
                 <div class="flex items-center gap-space-sm pl-space-sm cursor-pointer">
-                    <div id="teacher-user-avatar" class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-xs font-bold">A</div>
                     <div class="hidden md:flex flex-col text-left">
-                        <span class="font-label-md text-label-md text-on-surface leading-tight font-semibold"><span id="teacher-user-name">Teacher</span></span>
+                        <span class="font-label-md text-label-md text-on-surface text-right leading-tight font-semibold"><span id="teacher-user-name">Teacher</span></span>
                         <span id="teacher-last-login" class="font-label-sm text-label-sm text-on-surface-variant leading-tight">Last login: Loading...</span>
                     </div>
+                    <div id="teacher-user-avatar" class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-xs font-bold">T</div>
                 </div>
             </div>
         </header>

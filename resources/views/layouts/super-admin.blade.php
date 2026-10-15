@@ -79,7 +79,7 @@
                 <a href="{{ url('/super-admin/institutes') }}" class="nav-link {{ request()->is('super-admin/institutes*') ? 'active' : '' }} flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-white">
                     <span class="material-symbols-rounded">domain</span> Institutes
                 </a>
-                <a href="{{ url('/super-admin/configurations') }}" class="nav-link {{ request()->is('super-admin/configurations*') ? 'active' : '' }} flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-white">
+                <a href="{{ url('/super-admin/settings') }}" class="nav-link {{ request()->is('super-admin/settings*') ? 'active' : '' }} flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-white">
                     <span class="material-symbols-rounded">tune</span> Platform Settings
                 </a>
             </nav>
@@ -173,7 +173,7 @@
                 } else {
                     institutes.forEach(institute => {
                         const link = document.createElement('a');
-                        link.href = `/super-admin/institutes/${institute.id}`;
+                        link.href = `/super-admin/institutes/${institute.id}/view`;
                         link.className = 'flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition';
                         const icon = document.createElement('span');
                         icon.className = 'material-symbols-rounded flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-700';

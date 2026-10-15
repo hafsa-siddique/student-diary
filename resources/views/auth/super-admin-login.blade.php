@@ -3,326 +3,367 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#172554">
+    <meta name="theme-color" content="#1f1c1c">
     <title>Super Admin Login | Student Diary</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet">
 
     <style>
-        * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { margin: 0; background: #F8FAFC; color: #0F172A; }
-        .login-layout { min-height: 100vh; }
+        * { 
+            box-sizing: border-box; 
+            font-family: 'Inter', sans-serif; 
+        }
 
-        .auth-panel {
-            position: fixed; top: 0; right: 0; width: 50%; height: 100vh;
-            min-height: 100vh; padding: 40px 4% 5px; display: flex;
-            flex-direction: column; justify-content: space-between; overflow-y: auto;
-            overflow-x: hidden; isolation: isolate; color: #FFFFFF;
-            background: linear-gradient(135deg, #172554 0%, #1E3A8A 55%, #2563EB 100%);
+        :root {
+            --color-primary: #1f1c1c;
+            --color-secondary: #C9A227;
+            --color-canvas: #F5F7FA;
+            --color-card-bg: #292525;
+            --color-text-muted: #A1A1AA;
         }
-        .auth-panel::before {
-            content: ""; position: absolute; inset: 0; z-index: -1;
-            background-image: linear-gradient(#FFFFFF0A 1px, transparent 1px), linear-gradient(90deg, #FFFFFF0A 1px, transparent 1px);
-            background-size: 40px 40px; pointer-events: none;
+
+        html, body { 
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh; 
+            overflow: hidden; /* Disables all scrollbars */
+            background-color: var(--color-primary); 
+            color: #FFFFFF; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
-        .auth-panel::after {
-            content: ""; position: absolute; width: 420px; height: 420px;
-            right: -180px; top: 15%; z-index: -1; border: 1px solid #FFFFFF25;
-            border-radius: 50%; box-shadow: 0 0 0 45px #FFFFFF08, 0 0 0 90px #FFFFFF05;
+
+        /* Minimalist Background Pattern & Decorative Glow */
+        body::before {
+            content: "";
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            top: -200px;
+            left: -200px;
+            background: radial-gradient(circle, rgba(201, 162, 39, 0.12) 0%, transparent 70%);
             pointer-events: none;
+            z-index: 0;
         }
-        .brand-header, .brand-content, .brand-footer { position: relative; z-index: 1; }
-        .brand-header { display: flex; align-items: center; gap: 13px; }
-        .brand-logo {
-            width: 50px; height: 50px; flex-shrink: 0; display: flex;
-            align-items: center; justify-content: center; overflow: hidden;
-            border: 1px solid #FFFFFF35; border-radius: 15px;
-            background: #172554; color: #FFFFFF;
-        }
-        .brand-logo img { width: 100%; height: 100%; object-fit: contain; padding: 5px; filter: brightness(0) invert(1); }
-        .brand-name { margin: 0; color: #FFFFFF; font-size: 19px; font-weight: 800; letter-spacing: -.4px; }
-        .brand-caption { margin: 5px 0 0; color: #BFDBFE; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
-        .brand-content { max-width: 520px; margin: auto 0; padding: 55px 0; }
-        .brand-badge {
-            display: inline-flex; align-items: center; gap: 9px; margin-bottom: 27px;
-            padding: 10px 15px; border: 1px solid #FFFFFF25; border-radius: 30px;
-            background: #FFFFFF12; color: #DBEAFE; font-size: 12px; font-weight: 500;
-        }
-        .brand-badge .material-symbols-rounded { font-size: 18px; }
-        .brand-title { margin: 0; color: #FFFFFF; font-size: clamp(36px, 3.5vw, 53px); font-weight: 800; line-height: 1.17; letter-spacing: -1.8px; }
-        .brand-title span { color: #93C5FD; }
-        .brand-description { max-width: 440px; margin: 23px 0 0; color: #DBEAFE; font-size: 14px; line-height: 1.9; }
-        .feature-list { display: grid; gap: 23px; margin-top: 42px; }
-        .feature { display: flex; align-items: center; gap: 15px; }
-        .feature-icon {
-            display: flex; align-items: center; justify-content: center;
-            width: 45px; height: 45px; flex-shrink: 0;
-            border: 1px solid #FFFFFF20; border-radius: 13px;
-            background: #FFFFFF12; color: #FFFFFF;
-        }
-        .feature-icon .material-symbols-rounded { font-size: 22px; }
-        .feature-title { margin: 0; color: #FFFFFF; font-size: 13px; font-weight: 700; }
-        .feature-description { margin: 5px 0 0; color: #BFDBFE; font-size: 11px; line-height: 1.6; }
-        .brand-footer {
-            display: flex; align-items: center; justify-content: space-between;
-            gap: 12px; padding-top: 22px; border-top: 1px solid #FFFFFF25;
-            color: #BFDBFE; font-size: 11px;
-        }
-        .online-status { display: inline-flex; align-items: center; gap: 7px; }
-        .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ADE80; box-shadow: 0 0 10px #4ADE8060; }
 
-        .form-panel {
-            margin-left: 0; width: 50%; min-height: 100vh; padding: 45px 9%;
-            display: flex; align-items: center; justify-content: center; background: #F8FAFC;
+        body::after {
+            content: "";
+            position: absolute;
+            width: 550px;
+            height: 550px;
+            bottom: -200px;
+            right: -200px;
+            background: radial-gradient(circle, rgba(201, 162, 39, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
         }
-        .login-container { width: 100%; max-width: 410px; }
-        .mobile-brand { display: none; align-items: center; gap: 12px; margin-bottom: 38px; }
-        .mobile-logo {
-            display: flex; align-items: center; justify-content: center;
-            width: 45px; height: 45px; border-radius: 13px;
-            background: #172554; color: #FFFFFF; font-size: 17px; font-weight: 800;
+
+        /* Floating Minimalist Card - Increased Width */
+        .card-container {
+            position: relative;
+            z-index: 1;
+            width: 92%;
+            max-width: 560px; /* Increased card width */
+            background: var(--color-card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 36px 48px; /* Balanced padding to keep layout within viewport height */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
         }
-        .mobile-logo img { width: 100%; height: 100%; padding: 5px; object-fit: contain; filter: brightness(0) invert(1); }
-        .mobile-brand h3 { margin: 0; color: #0F172A; font-size: 16px; font-weight: 800; }
-        .mobile-brand p { margin: 4px 0 0; color: #64748B; font-size: 11px; }
-        .access-label {
-            display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px;
-            border: 1px solid #DBEAFE; border-radius: 8px; background: #EFF6FF;
-            color: #1D4ED8; font-size: 10px; font-weight: 800; letter-spacing: 1px;
+        header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
         }
-        .access-label .material-symbols-rounded { font-size: 17px; }
-        .form-heading { margin: 23px 0 0; color: #0F172A; font-size: 34px; font-weight: 800; letter-spacing: -1.2px; }
-        .form-subheading { margin: 12px 0 30px; color: #64748B; font-size: 13px; line-height: 1.8; }
+        /* Branding Header inside Card */
+        .card-brand {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-bottom: 10px;
+            gap:16px;
+            text-align:left;
+        }
+
+        .brand-logo-wrapper {
+            width: 45px;
+            height: 45px;
+            border-radius: 14px;
+            background: var(--color-primary);
+            border: 1px solid rgba(201, 162, 39, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .brand-logo-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 4px;
+            filter: brightness(0) invert(1);
+        }
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+        }
+        .brand-title {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 800;
+            color: #FFFFFF;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .access-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            margin-top: 2px;
+            margin-bottom: 20px;
+            padding: 5px 7px;
+            border-radius: 20px;
+            background: rgba(201, 162, 39, 0.12);
+            border: 1px solid rgba(201, 162, 39, 0.25);
+            color: var(--color-secondary);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .access-badge .material-symbols-rounded {
+            font-size: 14px;
+        }
+        /* Alerts & Messages */
         .error-message {
-            display: flex; gap: 10px; margin-bottom: 20px; padding: 13px;
-            border: 1px solid #FECACA; border-radius: 10px;
-            background: #FEF2F2; color: #B91C1C; font-size: 12px; line-height: 1.6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            padding: 10px 12px;
+            border: 1px solid #7F1D1D;
+            border-radius: 8px;
+            background: #450A0A;
+            color: #FCA5A5;
+            font-size: 11px;
         }
-        .success-message { margin-bottom: 20px; padding: 13px; border: 1px solid #BBF7D0; border-radius: 10px; background: #F0FDF4; color: #15803D; font-size: 12px; }
-        .form-group { margin-bottom: 21px; }
-        .form-label { display: block; margin-bottom: 9px; color: #334155; font-size: 12px; font-weight: 700; }
+
+        .success-message {
+            margin-bottom: 18px;
+            padding: 10px 12px;
+            border: 1px solid #14532D;
+            border-radius: 8px;
+            background: #052E16;
+            color: #86EFAC;
+            font-size: 11px;
+        }
+
+        /* Underline-Style Form Controls */
+        .form-group {
+            margin-bottom: 22px;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--color-text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
         .input-wrapper {
-            display: flex; align-items: center; gap: 12px; padding: 0 14px;
-            border: 1px solid #CBD5E1; border-radius: 11px; background: #FFFFFF;
-            transition: border-color .2s, box-shadow .2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 0;
+            border-bottom: 1.5px solid rgba(255, 255, 255, 0.15);
+            background: transparent;
+            transition: border-color 0.25s ease;
         }
-        .input-wrapper:focus-within { border-color: #2563EB; box-shadow: 0 0 0 3px #2563EB18; }
-        .input-icon { color: #94A3B8; font-size: 20px; }
+
+        .input-wrapper:focus-within {
+            border-bottom-color: var(--color-secondary);
+        }
+
+        .input-icon {
+            color: var(--color-text-muted);
+            font-size: 19px;
+            transition: color 0.25s ease;
+        }
+
+        .input-wrapper:focus-within .input-icon {
+            color: var(--color-secondary);
+        }
+
         .input-wrapper input {
-            width: 100%; min-width: 0; padding: 14px 0; border: 0; outline: none;
-            background: transparent; color: #0F172A; font-size: 12px;
+            width: 100%;
+            min-width: 0;
+            padding: 4px 0;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #FFFFFF;
+            font-size: 13px;
         }
-        .input-wrapper input::placeholder { color: #94A3B8; }
-        .password-toggle { display: flex; padding: 4px; border: 0; background: transparent; color: #94A3B8; cursor: pointer; }
-        .password-toggle:hover { color: #1D4ED8; }
-        .password-toggle .material-symbols-rounded { font-size: 20px; }
-        .form-options { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 5px 0 24px; }
+
+        .input-wrapper input::placeholder {
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        .password-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            border: 0;
+            background: transparent;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .password-toggle:hover {
+            color: #FFFFFF;
+        }
+
+        .password-toggle .material-symbols-rounded {
+            font-size: 19px;
+        }
+
+        /* Action Buttons */
         .login-btn {
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            width: 100%; padding: 15px 18px; border: 0; border-radius: 11px;
-            background: linear-gradient(100deg, #2563EB, #1D4ED8);
-            box-shadow: 0 6px 16px #2563EB25; color: #FFFFFF;
-            font-size: 12px; font-weight: 700; cursor: pointer;
-            transition: transform .2s, box-shadow .2s, background .2s;
-        }
-        .login-btn:hover { transform: translateY(-1px); background: #1D4ED8; box-shadow: 0 9px 22px #2563EB35; }
-        .login-btn:focus-visible { outline: 3px solid #93C5FD; outline-offset: 3px; }
-        .copyright { margin-top: 28px; color: #94A3B8; font-size: 10px; text-align: center; }
-        .mobile-login-brand { display: none; }
-        .mobile-login-brand-name { margin: 0; color: #0F172A; font-size: 17px; font-weight: 800; }
-        .mobile-login-brand-caption { margin: 5px 0 0; color: #64748B; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
-        @media (max-width: 1023px) {
-            .login-layout {
-                display: flex;
-                flex-direction: column;
-                min-height: 100vh;
-                background: linear-gradient(135deg, #172554 0%, #1E3A8A 55%, #2563EB 100%);
-            }
-
-            .auth-panel {
-                display: none;
-            }
-
-            .form-panel {
-                display: flex;
-                width: 100%;
-                min-height: 100vh;
-                margin: 0;
-                padding: 24px 20px;
-                align-items: center;
-                justify-content: center;
-                background: transparent;
-            }
-
-            .login-container {
-                width: 100%;
-                max-width: 430px;
-                margin: auto;
-                padding: 25px 22px;
-                background: #FFFFFF;
-                border-radius: 20px;
-                box-shadow: 0 20px 50px #0F172A35;
-            }
-
-            .mobile-login-brand {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                margin-bottom: 28px;
-            }
-
-            .mobile-login-brand .brand-logo {
-                width: 46px;
-                height: 46px;
-                border-color: #DBEAFE;
-            }
-
-            .mobile-brand,
-            .access-label,
-            .form-heading,
-            .form-subheading {
-                display: none;
-            }
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            margin-top: 28px;
+            padding: 13px 20px;
+            border: 0;
+            border-radius: 12px;
+            background: var(--color-secondary);
+            color: #1f1c1c;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(201, 162, 39, 0.25);
+            transition: all 0.25s ease;
         }
 
-        @media (max-width: 480px) {
-            .form-panel {
-                padding: 20px 16px;
-            }
-            .login-container {
-                padding: 24px 20px;
-            }
-            .form-group {
-                margin-bottom: 18px;
-            }
-            .form-options {
-                align-items: flex-start;
-            }
-            .copyright {
-                margin-top: 22px;
+        .login-btn:hover {
+            background: #d4ac2b;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(201, 162, 39, 0.35);
+        }
+
+        .login-btn:focus-visible {
+            outline: 2px solid var(--color-secondary);
+            outline-offset: 3px;
+        }
+
+        .copyright {
+            margin-top: 24px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 10px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .card-container {
+                padding: 28px 24px;
+                width: 95%;
             }
         }
 
     </style>
 </head>
 <body>
-    <main class="login-layout">
-        <section class="auth-panel">
-            <header class="brand-header">
-                <div class="brand-logo">
+
+    <!-- Minimalist Card Container -->
+    <main class="card-container">
+
+        <!-- Brand Header Section -->
+        <header>
+            <div class="card-brand">
+                <div class="brand-logo-wrapper">
                     <img src="{{ asset('storage/images/student-diary-logo.png') }}" alt="Student Diary Logo">
                 </div>
-                <div>
-                    <p class="brand-name">Student Diary</p>
-                    <p class="brand-caption">Platform Administration</p>
+                <div class="brand-text">
+                    <h1 class="brand-title">Student Diary</h1>
                 </div>
-            </header>
-
-            <div class="brand-content">
-                <h1 class="brand-title">One platform.<br><span>Every institute.</span></h1>
-                <p class="brand-description">Manage institutions, oversee platform activity, and keep every school connected through one secure administration portal.</p>
-                <div class="feature-list">
-                    <div class="feature">
-                        <div class="feature-icon"><span class="material-symbols-rounded">domain</span></div>
-                        <div>
-                            <p class="feature-title">Institute management</p>
-                            <p class="feature-description">Manage institutions from one place</p>
-                        </div>
-                    </div>
-                    <div class="feature">
-                        <div class="feature-icon"><span class="material-symbols-rounded">shield_lock</span></div>
-                        <div>
-                            <p class="feature-title">Secure administration</p>
-                            <p class="feature-description">Protected access for platform administrators</p>
-                        </div>
-                    </div>
-                    <div class="feature">
-                        <div class="feature-icon"><span class="material-symbols-rounded">settings_suggest</span></div>
-                        <div>
-                            <p class="feature-title">Centralized control</p>
-                            <p class="feature-description">Manage platform-wide settings and access</p>
-                        </div>
-                    </div>
-                </div>
+            </div>    
+            <div class="access-badge">
+                <span class="material-symbols-rounded">admin_panel_settings</span>
+                SUPER ADMIN ACCESS
             </div>
-        </section>
+        </header>
 
-        <section class="form-panel">
-            <div class="login-container">
-                <div class="mobile-brand">
-                    <div class="mobile-logo">
-                        <img src="{{ asset('storage/images/student-diary-logo.png') }}" alt="Student Diary Logo">
-                    </div>
-                    <div>
-                        <h3>Student Diary</h3>
-                        <p>Platform Administration</p>
-                    </div>
+        <!-- Validation & Error Messages -->
+        @if ($errors->any())
+            <div role="alert" class="error-message">
+                <span class="material-symbols-rounded">error</span>
+                <div>{{ $errors->first() }}</div>
+            </div>
+        @endif
+
+        @if (session('status'))
+            <div role="status" class="success-message">{{ session('status') }}</div>
+        @endif
+
+        <!-- Login Form -->
+        <form id="superAdminLoginForm" method="POST" action="">
+            @csrf
+
+            <!-- Email Field -->
+            <div class="form-group">
+                <label for="email" class="form-label">Email address</label>
+                <div class="input-wrapper">
+                    <span class="material-symbols-rounded input-icon">mail</span>
+                    <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="admin@example.com">
                 </div>
-                <header class="mobile-login-brand">
-                    <div class="brand-logo">
-                        <img src="{{ asset('storage/images/student-diary-logo.png') }}" alt="Student Diary Logo">
-                    </div>
-                    <div>
-                        <p class="mobile-login-brand-name">Student Diary</p>
-                        <p class="mobile-login-brand-caption">Platform Administration</p>
-                    </div>
-                </header>
-                <div class="access-label">
-                    <span class="material-symbols-rounded">admin_panel_settings</span>
-                    SUPER ADMIN ACCESS
-                </div>
+                @error('email')
+                    <p style="margin: 5px 0 0; color: #FCA5A5; font-size: 11px;">{{ $message }}</p>
+                @enderror
+            </div>
 
-                <h2 class="form-heading">Welcome back</h2>
-                <p class="form-subheading">Sign in to your administrator account to continue to the platform dashboard.</p>
-
-                @if ($errors->any())
-                    <div role="alert" class="error-message">
-                        <span class="material-symbols-rounded">error</span>
-                        <div>{{ $errors->first() }}</div>
-                    </div>
-                @endif
-
-                @if (session('status'))
-                    <div role="status" class="success-message">{{ session('status') }}</div>
-                @endif
-
-                <form id="superAdminLoginForm" method="POST" action="">
-                    @csrf
-                    <div class="form-group">
-                        <label for="email" class="form-label">Email address</label>
-                        <div class="input-wrapper">
-                            <span class="material-symbols-rounded input-icon">mail</span>
-                            <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="admin@example.com">
-                        </div>
-                        @error('email')
-                            <p style="margin:7px 0 0;color:#B91C1C;font-size:11px">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password" class="form-label">Password</label>
-                        <div class="input-wrapper">
-                            <span class="material-symbols-rounded input-icon">lock</span>
-                            <input id="password" name="password" type="password" required autocomplete="current-password" placeholder="Enter your password">
-                            <button type="button" id="togglePassword" class="password-toggle" aria-label="Show password">
-                                <span id="passwordIcon" class="material-symbols-rounded">visibility</span>
-                            </button>
-                        </div>
-                        @error('password')
-                            <p style="margin:7px 0 0;color:#B91C1C;font-size:11px">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    <button type="submit" id="loginButton" class="login-btn">
-                        <span id="loginButtonText">Sign in to dashboard</span>
-                        <span id="loginButtonIcon" class="material-symbols-rounded">arrow_forward</span>
-                        <span id="loginSpinner" class="material-symbols-rounded animate-spin hidden">progress_activity</span>
+            <!-- Password Field -->
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-wrapper">
+                    <span class="material-symbols-rounded input-icon">lock</span>
+                    <input id="password" name="password" type="password" required autocomplete="current-password" placeholder="••••••••••••">
+                    <button type="button" id="togglePassword" class="password-toggle" aria-label="Show password">
+                        <span id="passwordIcon" class="material-symbols-rounded">visibility</span>
                     </button>
-                </form>
-
-                <p class="copyright">© {{ date('Y') }} Student Diary. All rights reserved.</p>
+                </div>
+                @error('password')
+                    <p style="margin: 5px 0 0; color: #FCA5A5; font-size: 11px;">{{ $message }}</p>
+                @enderror
             </div>
-        </section>
+
+            <!-- Submit Button -->
+            <button type="submit" id="loginButton" class="login-btn">
+                <span id="loginButtonText">Sign in to dashboard</span>
+                <span id="loginButtonIcon" class="material-symbols-rounded">arrow_forward</span>
+                <span id="loginSpinner" class="material-symbols-rounded animate-spin hidden">progress_activity</span>
+            </button>
+        </form>
+
+        <p class="copyright">© {{ date('Y') }} Student Diary. All rights reserved.</p>
+
     </main>
 
     <script>
@@ -366,7 +407,18 @@
                 });
                 const result = await response.json();
                 if (!response.ok || !result.status) {
-                    alert(result.message || 'Login failed.');
+                    let errorContainer = document.querySelector('.error-message');   
+                    const errorMessageText = result.message || 'Invalid credentials. Please try again.';
+                    if (errorContainer) {
+                        errorContainer.querySelector('div').textContent = errorMessageText;
+                        errorContainer.classList.remove('hidden'); // Ensure it's visible
+                    } else {
+                        const form = document.getElementById('superAdminLoginForm');
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'error-message';
+                        errorDiv.innerHTML = `<span class="material-symbols-rounded">error</span><div>${errorMessageText}</div>`;
+                        form.parentNode.insertBefore(errorDiv, form);
+                    }
                     return;
                 }
                 if (result.user?.role !== 'super_admin') {

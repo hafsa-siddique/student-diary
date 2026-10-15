@@ -25,6 +25,7 @@ class ConfigurationResource extends JsonResource
             'small_logo' => $this->small_logo,
             'login_logo' => $this->login_logo,
             'favicon' => $this->favicon,
+            'login_layout' => $this->login_layout,
             'primary_color' => $this->primary_color,
             'secondary_color' => $this->secondary_color,
             'contact_email' => $this->contact_email,
