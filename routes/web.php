@@ -51,6 +51,8 @@ Route::view('/teacher/assignments', 'teacher.assignments.index')
     ->name('teacher.assignments');    
 Route::view('/teacher/scheduledDiaries', 'teacher.diaries.scheduled-diaries')
     ->name('teacher.scheduled-diaries');    
+Route::view('/teacher/classes-review', 'teacher.classes-review')
+    ->name('teacher.classes-review');       
 
 Route::view('/parent/dashboard', 'parent.dashboard')
     ->name('parent.dashboard');    

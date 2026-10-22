@@ -35,89 +35,56 @@
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
 
     <!-- Classes -->
-    <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm hover:shadow-md transition-shadow">
+    <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-primary border border-outline-variant/40  ">
         <div class="flex items-start justify-between">
             <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">
                 My Classes
             </span>
-            <div class="p-1.5 rounded-lg bg-surface-container-low text-primary">
-                <span class="material-symbols-outlined text-[20px]">domain</span>
-            </div>
-        </div>
-        <div class="mt-space-md">
             <div id="classCount"
                  class="font-display-lg text-display-lg text-on-surface font-tabular-numeric">
                 0
             </div>
-            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
-                Assigned classes
-            </p>
         </div>
     </div>
 
    <!-- Assignments -->
 
-<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm hover:shadow-md transition-shadow">
-    <div class="flex items-start justify-between">
-        <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">
-            My Assignments
-        </span>
-        <div class="p-1.5 rounded-lg bg-surface-container-low text-primary">
-            <span class="material-symbols-outlined text-[20px]">assignment</span>
+    <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-secondary border border-outline-variant/40">
+        <div class="flex items-start justify-between">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">
+                My Assignments
+            </span>
+            <div id="assignmentCount"
+                class="font-display-lg text-display-lg text-on-surface font-tabular-numeric">
+                0
+            </div>
         </div>
     </div>
-    <div class="mt-space-md">
-        <div id="assignmentCount"
-             class="font-display-lg text-display-lg text-on-surface font-tabular-numeric">
-            0
-        </div>
-        <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
-            Class-subject allocations
-        </p>
-    </div>
-</div>
 
 
     <!-- Today's Diaries -->
-    <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm hover:shadow-md transition-shadow">
+    <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-tertiary border border-outline-variant/40">
         <div class="flex items-start justify-between">
             <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">
-                Today's Diaries
+                Remaining Diaries
             </span>
-            <div class="p-1.5 rounded-lg bg-surface-container-low text-primary">
-                <span class="material-symbols-outlined text-[20px]">today</span>
-            </div>
-        </div>
-        <div class="mt-space-md">
-            <div id="todayDiaryCount"
-                 class="font-display-lg text-display-lg text-on-surface font-tabular-numeric">
+            <div id="todayRemaining"
+                class="font-display-lg text-display-lg text-on-surface font-tabular-numeric">
                 0
-            </div>
-            <div class="flex items-center gap-3 mt-1 font-body-sm text-body-sm text-on-surface-variant">
-                <span>Published <strong id="todayPublished">0</strong></span>
-                <span>Remaining <strong id="todayRemaining">0</strong></span>
             </div>
         </div>
     </div>
 
     <!-- Scheduled -->
-    <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm hover:shadow-md transition-shadow">
+    <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-outline border border-outline-variant/40">
         <div class="flex items-start justify-between">
             <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">
                 Scheduled Queue
             </span>
-            <div class="p-1.5 rounded-lg bg-surface-container-low text-primary">
-                <span class="material-symbols-outlined text-[20px]">schedule</span>
-            </div>
-        </div>
-        <div class="mt-space-md">
             <div id="scheduledCount"
                  class="font-display-lg text-display-lg text-on-surface font-tabular-numeric">
                 0
             </div>
-            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
-                Diaries scheduled
-            </p>
         </div>
     </div>
 </div>
@@ -136,25 +103,25 @@
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
 
         <a href="/teacher/diaries/create" id="openCreateDiaryModalShortcut"
-           class="flex items-center gap-2 p-3 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors">
+           class="flex items-center gap-2 p-3 rounded-lg bg-surface-container-low hover:bg-surface-container hover:border-primary border border-outline-variant/30 hover:shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-0.5 group">
             <span class="material-symbols-outlined text-primary">edit_note</span>
             <span class="font-label-md text-label-md text-on-surface">Create Diary</span>
         </a>
 
         <a href="/teacher/assignments" data-spa-link
-           class="flex items-center gap-2 p-3 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors">
+           class="flex items-center gap-2 p-3 rounded-lg bg-surface-container-low hover:bg-surface-container hover:border-primary border border-outline-variant/30 hover:shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-0.5 group">
             <span class="material-symbols-outlined text-primary">assignment</span>
             <span class="font-label-md text-label-md text-on-surface">My Assignments</span>
         </a>
 
         <a href="/teacher/diaries" data-spa-link
-           class="flex items-center gap-2 p-3 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors">
+           class="flex items-center gap-2 p-3 rounded-lg bg-surface-container-low hover:bg-surface-container hover:border-primary border border-outline-variant/30 hover:shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-0.5 group">
             <span class="material-symbols-outlined text-primary">menu_book</span>
             <span class="font-label-md text-label-md text-on-surface">My Diaries</span>
         </a>
 
         <a href="/teacher/scheduledDiaries" data-spa-link
-           class="flex items-center gap-2 p-3 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors">
+           class="flex items-center gap-2 p-3 rounded-lg bg-surface-container-low hover:bg-surface-container hover:border-primary border border-outline-variant/30 hover:shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-0.5 group">
             <span class="material-symbols-outlined text-primary">schedule</span>
             <span class="font-label-md text-label-md text-on-surface">Scheduled Diaries</span>
         </a>
@@ -941,12 +908,6 @@
         document.getElementById('assignmentCount').textContent =
             assignmentStats.total ?? 0;
 
-        document.getElementById('todayDiaryCount').textContent =
-            diaryStats.total ?? 0;
-
-        document.getElementById('todayPublished').textContent =
-            diaryStats.published ?? 0;
-
         document.getElementById('todayRemaining').textContent =
             diaryStats.remaining ?? 0;
 
@@ -976,9 +937,6 @@
             if (!diariesResult) return;
 
             const diaryStats = diariesResult.statistics || {};
-
-            document.getElementById('todayDiaryCount').textContent =
-                diaryStats.total ?? 0;
 
             document.getElementById('todayPublished').textContent =
                 diaryStats.published ?? 0;

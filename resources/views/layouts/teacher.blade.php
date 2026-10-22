@@ -312,6 +312,10 @@
                     <span class="material-symbols-outlined text-[20px]">person</span>
                     <span class="font-body-md text-body-md">Scheduled Diaries</span>
                 </a>
+                <a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-primary-container hover:bg-primary hover:text-on-primary transition-colors hover:brightness-110" data-path="classes" data-spa-link href="/teacher/classes-review">
+                    <span class="material-symbols-outlined text-[20px]">assignment_turned_in</span>
+                    <span class="font-body-md text-body-md">Classes Review</span>
+                </a>
         </div>
         <div class="px-space-xs py-space-sm bg-primary flex flex-col gap-1">
             <div class="px-space-sm pt-space-xs pb-1">

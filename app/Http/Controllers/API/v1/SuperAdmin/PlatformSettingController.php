@@ -24,7 +24,13 @@ class PlatformSettingController extends Controller
         ]);
 
         foreach($request->settings as $key => $value){
-            PlatformSetting::setVal($key,$value);
+            if ($request->hasFile("settings.{$key}")) {
+                $file = $request->file("settings.{$key}");
+                $path = $file->store('images', 'public');
+                PlatformSetting::setVal($key, $path);
+            } else {
+                PlatformSetting::setVal($key, $value);
+            }
         }
         return response()->json([
             'status' => true,

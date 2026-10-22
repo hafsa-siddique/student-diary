@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1\SuperAdmin;
+namespace App\Http\Controllers\API\v1\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\InstituteAdminResource;
@@ -14,7 +14,9 @@ class InstituteAdminController extends Controller
     public function show(Institute $institute)
     {
         $admin = User::where('institute_id', $institute->id)
-            ->where('role', 'admin')
+            ->whereHas('role', function($query) {
+                $query->where('slug', 'admin');
+            })
             ->first();
         if (!$admin) {
             return response()->json([
@@ -32,7 +34,9 @@ class InstituteAdminController extends Controller
     public function store(Request $request, Institute $institute)
     {
         $existingAdmin = User::where('institute_id', $institute->id)
-            ->where('role', 'admin')->exists();
+            ->whereHas('role', function($query) {
+                $query->where('slug', 'admin');
+            })->exists();
         if ($existingAdmin) {
             return response()->json([
                 'status' => false,
@@ -61,7 +65,9 @@ class InstituteAdminController extends Controller
     public function update(Request $request, Institute $institute)
     {
         $admin = User::where('institute_id', $institute->id)
-            ->where('role', 'admin')->first();
+            ->whereHas('role', function($query) {
+                $query->where('slug', 'admin');
+            })->first();
         if (!$admin) {
             return response()->json([
                 'status' => false,
@@ -89,7 +95,9 @@ class InstituteAdminController extends Controller
     public function updateStatus(Institute $institute)
     {
         $admin = User::where('institute_id', $institute->id)
-            ->where('role', 'admin')->first();
+            ->whereHas('role', function($query) {
+                $query->where('slug', 'admin');
+            })->first();
         if (!$admin) {
             return response()->json([
                 'status' => false,

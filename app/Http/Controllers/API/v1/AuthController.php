@@ -21,13 +21,20 @@ class AuthController extends Controller
             if(!Auth::attempt([
                 'email' => $request->email,
                 'password' => $request->password,
-                'role' => 'super_admin',
                 'institute_id' => null,
             ])){
                 return response()->json([
                     'status' => false,
                     'message' => 'Invalid Credentials'
                 ],401);
+            }
+            $user = User::with('role')->find(Auth::id());
+            if ($user->role?->slug !== 'super_admin') {
+                Auth::logout();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Unauthorized Access'
+                ], 403);
             }
         } else {
             $institute = Institute::where('code',$request->institute_id)->first();
@@ -68,7 +75,7 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'role' => $user->role,
+                'role' => $user->role->slug,
                 'institute' => $user->institute?->name,
                 'last_login_at' => $previousLoginAt,
             ],
@@ -87,7 +94,7 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'role' => $user->role,
+                'role' => $user->role->slug,
                 'institute' => $user->institute?->name,
             ]
         ],200);

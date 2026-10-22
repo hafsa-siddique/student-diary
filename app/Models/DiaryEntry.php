@@ -36,4 +36,8 @@ class DiaryEntry extends Model
     {
         return $this->hasMany(DiaryAttachment::class);
     }
+    public function parentFeedbacks()
+{
+    return $this->hasMany(DiaryParentFeedback::class);
+}
 }

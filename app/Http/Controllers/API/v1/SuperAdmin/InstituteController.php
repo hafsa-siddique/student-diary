@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\InstituteResource;
 use App\Models\Configuration;
 use App\Models\Institute;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -143,12 +144,13 @@ class InstituteController extends Controller
                 'code' => strtoupper($request->code),
                 'status' => $request->status ?? 1,
             ]);
+            $adminRole = Role::where('slug', 'admin')->first();
             $admin = User::create([
                 'institute_id' => $institute->id,
                 'name' => $request->admin_name,
                 'email' => $request->admin_email,
                 'password' => Hash::make($request->admin_password),
-                'role' => 'admin',
+                'role_id' => $adminRole?->id,
                 'status' => 1,
             ]);
 

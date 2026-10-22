@@ -378,7 +378,7 @@ async function fetchInstituteProfileData() {
     try {
         const [instRes, configRes, adminRes] = await Promise.all([
             fetch(`/api/v1/super-admin/institutes/${instituteId}`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } }),
-            // Fixed route to singular /configuration matching your routes file
+            
             fetch(`/api/v1/super-admin/institutes/${instituteId}/configuration`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } }).catch(() => null),
             fetch(`/api/v1/super-admin/institutes/${instituteId}/admin`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } }).catch(() => null)
         ]);

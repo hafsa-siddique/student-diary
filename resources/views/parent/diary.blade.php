@@ -164,28 +164,33 @@
         </section>
 
         <!-- Feed Header -->
-        <div class="flex items-center justify-between mb-space-md">
-
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-space-md">
             <div class="flex flex-col">
-
                 <div class="flex items-center gap-2">
-
                     <h2 class="font-headline-md text-headline-md text-on-surface">
                         Daily Diary
                     </h2>
-
                     <span id="subjectCount"
                           class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-tabular-numeric text-label-sm font-semibold">
                         0 Subjects
                     </span>
 
                 </div>
-
                 <p id="diaryDescription"
                    class="font-body-md text-body-md text-on-surface-variant mt-0.5">
                     Published diary entries
                 </p>
-
+            </div>
+            <div id="progressContainer" class="hidden flex items-center gap-3 bg-surface-container-lowest px-4 py-2 rounded-xl shadow-sm min-w-[240px]">
+                <div class="flex flex-col flex-1">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Completion Progress</span>
+                        <span id="progressText" class="font-label-sm text-label-sm font-bold text-primary">0%</span>
+                    </div>
+                    <div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+                        <div id="progressBar" class="bg-secondary h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -386,12 +391,15 @@ function renderEntries(entries) {
     entries.forEach(entry => {
         feed.insertAdjacentHTML('beforeend', createDiaryCard(entry));
     });
+    setupDiaryInteractions();
+    updateProgressBar();
 }
 
 function createDiaryCard(entry) {
     const homework = entry.homework || entry.homework_details;
     const classwork = entry.classwork || entry.classwork_details;
-
+    const isCompleted = entry.is_completed || false;
+    const savedRemarks = entry.remarks || '';
     return `
         <article class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md hover:shadow-md transition-shadow">
 
@@ -424,18 +432,14 @@ function createDiaryCard(entry) {
                         </span>
                     </div>
                 </div>
-
-                ${homework ? `
-                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-fixed/20 text-on-secondary-fixed-variant font-label-sm text-label-sm font-semibold">
-                        <span class="material-symbols-outlined text-[14px]">edit_note</span>
-                        Homework
-                    </span>
-                ` : `
-                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
-                        <span class="material-symbols-outlined text-[14px]">done_all</span>
-                        Class Completed
-                    </span>
-                `}
+                <label class="flex items-center gap-2 cursor-pointer bg-surface-container-low px-3 py-1.5 rounded-lg hover:bg-surface-container transition-colors">
+                    <input type="checkbox" 
+                           class="diary-checkbox w-4 h-4 rounded text-primary border-outline focus:ring-primary cursor-pointer" 
+                           data-id="${entry.id}" 
+                           data-student-id = "${entry.student?.id}" 
+                           ${isCompleted ? 'checked' : ''}>
+                    <span class="font-label-sm text-label-sm font-semibold text-on-surface">Mark as Done</span>
+                </label>
             </div>
 
             ${homework ? `
@@ -486,22 +490,39 @@ function createDiaryCard(entry) {
 
                 </div>
             `}
-
-            ${classwork ? `
-                <div class="bg-surface rounded-lg p-space-sm px-space-md flex items-start gap-space-xs text-on-surface-variant">
-
-                    <span class="material-symbols-outlined text-[18px] text-outline mt-0.5">
-                        school
-                    </span>
-
-                    <p class="font-body-md text-body-md text-on-surface leading-normal">
-                        <span class="font-semibold text-on-surface">Classwork:</span>
-                        ${classwork}
-                    </p>
-
+            <!-- Parent Remarks Section -->
+            <div class="flex flex-col gap-1.5 pt-2 border-t border-outline-variant">
+                <div class="flex items-center justify-between">
+                    <label for="remarks_${entry.id}" class="font-label-sm text-label-sm font-medium text-on-surface flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[16px] text-primary">comment</span>
+                        Parent Remarks for Teacher
+                    </label>
+                    ${entry.teacher_acknowledged ? `
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 text-green-700 text-xs font-semibold">
+                            <span class="material-symbols-outlined text-[14px]">done_all</span>
+                            Seen by Teacher
+                        </span>
+                    ` : `
+                        <span class="text-xs text-outline italic">
+                            Pending teacher review
+                        </span>
+                    `}
+                </div>    
+                <div class="flex gap-2">
+                    <input type="text" 
+                           id="remarks_${entry.id}_${entry.student?.id}" 
+                           class="diary-remarks-input flex-1 rounded-lg border border-outline-variant bg-surface px-3 py-1.5 text-sm text-on-surface focus:outline-none focus:border-primary" 
+                           placeholder="Write a note to the teacher regarding this entry..." 
+                           value="${savedRemarks}"
+                           data-id="${entry.id}">
+                    <button type="button" 
+                            class="save-remarks-btn px-3 py-1.5 rounded-lg bg-surface-container text-on-surface text-sm font-medium hover:bg-surface-container-high transition-colors"
+                            data-id="${entry.id}"
+                            data-student-id="${entry.student?.id}">
+                        Save Note
+                    </button>
                 </div>
-            ` : ''}
-
+            </div>
             <div class="flex items-center justify-end pt-space-xs flex-wrap gap-space-sm">
 
                 ${entry.attachments_count ? `
@@ -601,7 +622,81 @@ async function loadDiary() {
 
     }
 }
+function updateProgressBar() {
+    const checkboxes = document.querySelectorAll('.diary-checkbox');
+    const container = document.getElementById('progressContainer');
+    if (!checkboxes.length) {
+        container.classList.add('hidden');
+        return;
+    }
+    container.classList.remove('hidden');
+    let completedCount = 0;
+    checkboxes.forEach(cb => {
+        if (cb.checked) completedCount++;
+    });
+    const percentage = Math.round((completedCount / checkboxes.length) * 100);
+    document.getElementById('progressText').textContent = `${percentage}%`;
+    document.getElementById('progressBar').style.width = `${percentage}%`;
+}
+function setupDiaryInteractions() {
+    document.querySelectorAll('.diary-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change',async (e) => {
+            const diaryId = e.target.dataset.id;
+            const studentId = e.target.dataset.studentId;
+            const isCompleted = e.target.checked;
+            try {
+                await fetch(`${API_BASE}/parent/diaries/${diaryId}/feedback`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ 
+                        student_id: studentId,
+                        is_completed: isCompleted
+                     })
+                });
+                updateProgressBar();
+            } catch (err) {
+                console.error('Failed to update completion status', err);
+            }
+        });
+    });
 
+    document.querySelectorAll('.save-remarks-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const diaryId = e.target.dataset.id;
+            const studentId = e.target.dataset.studentId;
+            const input = document.getElementById(`remarks_${diaryId}_${studentId}`);
+            const remarksText = input.value.trim();
+
+            try {
+                const response = await fetch(`${API_BASE}/parent/diaries/${diaryId}/feedback`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ 
+                        student_id: studentId,
+                        remarks: remarksText 
+                    })
+                });
+                
+                const result = await response.json();
+                if (!response.ok) {
+                    // Extract exact validation error or message from Laravel
+                    const errorMsg = result.message || (result.errors ? Object.values(result.errors).flat().join(' ') : 'Failed to save remarks.');
+                    throw new Error(errorMsg);
+                }
+
+                const originalText = btn.textContent;
+                btn.textContent = 'Saved!';
+                btn.classList.add('bg-primary', 'text-on-primary');
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('bg-primary', 'text-on-primary');
+                }, 1500);
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+    });
+}
 document.getElementById('previousDay').addEventListener(
     'click',
     () => changeDate(-1)

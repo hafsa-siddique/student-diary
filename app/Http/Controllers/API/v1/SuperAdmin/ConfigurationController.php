@@ -29,10 +29,11 @@ class ConfigurationController extends Controller
     public function update(Request $request, Institute $institute)
     {
         $validatedData = $request->validate([
-            'main_logo' => 'nullable|string|max:255',
-            'small_logo' => 'nullable|string|max:255',
-            'login_logo' => 'nullable|string|max:255',
-            'favicon' => 'nullable|string|max:255',
+            'main_logo' => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:2048',
+            'small_logo' => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:2048',
+            'login_logo' => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:2048',
+            'login_cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
+            'favicon' => 'nullable|image|mimes:ico,png,jpg|max:1024',
             'login_layout' => 'nullable|in:layout_one,layout_two',
             'primary_color' => 'nullable|string|max:20',
             'secondary_color' => 'nullable|string|max:20',

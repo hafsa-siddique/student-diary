@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\v1\Teacher;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TeacherDiaryResource;
 use App\Models\DiaryEntry;
+use App\Models\PlatformSetting;
 use App\Models\TeacherAssignment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -118,15 +119,19 @@ class DiaryEntryController extends Controller
     {
         $user = $request->user();
         $teacher = $user->teacher;
+        $maxDiaryLength = (int) PlatformSetting::getVal('max_diary_length', 2000);
         $validatedData = $request->validate([
             'teacher_assignment_id' => 'required|exists:teacher_assignments,id',
             'diary_date' => 'required|date',
-            'classwork' => 'nullable|string',
-            'homework' => 'nullable|string',
+            'classwork' => 'nullable|string|max:'.$maxDiaryLength,
+            'homework' => 'nullable|string|max:'.$maxDiaryLength,
             'instructions' => 'nullable|string',
             'due_date' => 'nullable|date',
             'status' => 'required|in:draft,scheduled,published',
             'scheduled_at' => 'nullable|date',
+        ], [
+            'classwork.max' => "The classwork notes cannot exceed {$maxDiaryLength} characters.",
+            'homework.max' => "The homework notes cannot exceed {$maxDiaryLength} characters.",
         ]);
         // Get assignment
         $assignment = TeacherAssignment::where('id',$validatedData['teacher_assignment_id'])

@@ -1,7 +1,5 @@
 <?php
 
-use App\Http\Controllers\Api\v1\Admin\TeacherController;
-use App\Http\Controllers\Api\v1\SuperAdmin\InstituteAdminController;
 use App\Http\Controllers\API\v1\Admin\AcademicSessionController;
 use App\Http\Controllers\API\v1\Admin\ClassController;
 use App\Http\Controllers\API\v1\Admin\ClassSubjectController;
@@ -12,15 +10,18 @@ use App\Http\Controllers\API\v1\Admin\StudentController;
 use App\Http\Controllers\API\v1\Admin\StudentEnrollmentController;
 use App\Http\Controllers\API\v1\Admin\SubjectController;
 use App\Http\Controllers\API\v1\Admin\TeacherAssignmentController;
+use App\Http\Controllers\API\v1\Admin\TeacherController;
 use App\Http\Controllers\API\v1\AuthController;
 use App\Http\Controllers\API\v1\Parent\DiaryController;
 use App\Http\Controllers\API\v1\Parent\ParentController as ParentParentController;
 use App\Http\Controllers\API\v1\SuperAdmin\ConfigurationController;
+use App\Http\Controllers\API\v1\SuperAdmin\InstituteAdminController;
 use App\Http\Controllers\API\v1\SuperAdmin\InstituteController;
 use App\Http\Controllers\API\v1\SuperAdmin\PlatformSettingController;
 use App\Http\Controllers\API\v1\Teacher\DiaryAttachmentController;
 use App\Http\Controllers\API\v1\Teacher\DiaryEntryController;
 use App\Http\Controllers\API\v1\Teacher\TeacherController as TeacherTeacherController;
+use App\Http\Controllers\API\v1\Teacher\TeacherHomeworkReviewController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/user', function (Request $request) {
@@ -111,6 +112,8 @@ Route::prefix('v1')->group(function (){
         Route::get('teacher/diaries/{diary}/attachments',[DiaryAttachmentController::class,'index']);
         Route::post('teacher/diaries/{diary}/attachments',[DiaryAttachmentController::class,'store']);
         Route::delete('teacher/diaries/{diary}/attachments/{attachment}',[DiaryAttachmentController::class,'destroy']);
+        Route::get('teacher/assignments/{assignment}/homework-review', [TeacherHomeworkReviewController::class, 'getStudentsHomeworkReview']);
+        Route::post('teacher/feedbacks/{feedback}/acknowledge', [TeacherHomeworkReviewController::class, 'acknowledge']);
 
     });
 
@@ -126,6 +129,7 @@ Route::prefix('v1')->group(function (){
         Route::get('parent/diaries/{diary}',[DiaryController::class, 'show']);
         Route::get('parent/diaries/{diary}/attachments',[DiaryController::class, 'attachments']);
         Route::get('parent/diaries/{diary}/attachments/{attachment}/download',[DiaryController::class, 'downloadAttachment']);
+        Route::post('parent/diaries/{diary}/feedback',[DiaryController::class,'updateFeedback']);
         
     });
 });

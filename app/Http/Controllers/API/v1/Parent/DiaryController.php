@@ -7,6 +7,7 @@ use App\Http\Resources\DiaryAttachmentResource;
 use App\Http\Resources\ParentDiaryResource;
 use App\Models\DiaryAttachment;
 use App\Models\DiaryEntry;
+use App\Models\DiaryParentFeedback;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -217,5 +218,31 @@ class DiaryController extends Controller
             $filePath,
             $attachment->file_name
         );
+    }
+    public function updateFeedback(Request $request, DiaryEntry $diary)
+    {
+        $validated = $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'is_completed' => 'boolean',
+            'remarks' => 'nullable|string|max:1000',
+        ]);
+        $feedback = DiaryParentFeedback::firstOrNew(
+            [
+                'diary_entry_id' => $diary->id,
+                'student_id' => $validated['student_id'],
+            ]);
+        $feedback->parent_id = $request->user()->id;    
+        if ($request->has('is_completed')) {
+            $feedback->is_completed = $validated['is_completed'];
+        }
+        if ($request->has('remarks')) {
+            $feedback->remarks = $validated['remarks'];
+        }
+        $feedback->save();
+        return response()->json([
+            'status' => true,
+            'message' => 'Feedback saved successfully.',
+            'data' => $feedback,
+        ]);
     }
 }

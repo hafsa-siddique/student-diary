@@ -407,6 +407,25 @@
         </form>
     </div>
 </div>
+<!-- Delete Confirmation Modal -->
+<div id="deleteConfirmModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
+    <div class="w-full max-w-sm rounded-2xl bg-surface-container-lowest shadow-xl p-6 space-y-4">
+        <div class="flex items-center gap-3 text-red-600">
+            <h3 class="font-headline-md text-headline-md text-on-surface">Delete Diary Entry</h3>
+        </div>
+        <p class="text-sm text-on-surface-variant">
+            Are you sure you want to delete this diary entry? This action cannot be undone and any associated files will be removed.
+        </p>
+        <div class="flex justify-end gap-3 pt-2">
+            <button type="button" id="cancelDeleteBtn" class="rounded-lg border border-outline-variant px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-container">
+                Cancel
+            </button>
+            <button type="button" id="confirmDeleteBtn" class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">
+                Delete
+            </button>
+        </div>
+    </div>
+</div>
 <div
     id="toastNotification"
     class="fixed bottom-6 right-6 z-50 bg-inverse-surface text-inverse-on-surface px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 translate-y-16 opacity-0 pointer-events-none transition-all duration-300">
@@ -437,6 +456,8 @@
 
     let currentPage = 1;
     let currentDiary = null;
+    let editingDiaryId = null;
+    let deletingDiaryId = null;
 
     const escapeHtml = value => {
         const div = document.createElement('div');
@@ -506,35 +527,22 @@
 };
 
     const renderActions = diary => {
-        if (diary.status !== 'draft') {
-            return `
-                <span class="text-xs text-on-surface-variant">-</span>
-            `;
-        }
-
         return `
             <div class="flex items-center justify-end gap-1">
-
-                <button
-                    type="button"
-                    title="Publish Diary"
-                    data-action="publish"
-                    data-id="${diary.id}"
-                    class="flex items-center justify-center w-9 h-9 rounded-lg
-                           text-secondary transition-colors">
-                    <span class="material-symbols-outlined text-[19px]">publish</span>
+                ${diary.status === 'draft' ? `
+                    <button type="button" title="Publish Diary" data-action="publish" data-id="${diary.id}" class="flex items-center justify-center w-9 h-9 rounded-lg text-secondary transition-colors">
+                        <span class="material-symbols-outlined text-[19px]">publish</span>
+                    </button>
+                    <button type="button" title="Schedule Diary" data-action="schedule" data-id="${diary.id}" class="flex items-center justify-center w-9 h-9 rounded-lg text-primary transition-colors">
+                        <span class="material-symbols-outlined text-[19px]">schedule</span>
+                    </button>
+                    <button type="button" title="Edit Diary" data-action="edit" data-id="${diary.id}" class="flex items-center justify-center w-9 h-9 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+                        <span class="material-symbols-outlined text-[19px]">edit</span>
+                    </button>
+                ` : ''}
+                <button type="button" title="Delete Diary" data-action="delete" data-id="${diary.id}" class="flex items-center justify-center w-9 h-9 rounded-lg text-red-600 hover:bg-red-50 transition-colors">
+                    <span class="material-symbols-outlined text-[19px]">delete</span>
                 </button>
-
-                <button
-                    type="button"
-                    title="Schedule Diary"
-                    data-action="schedule"
-                    data-id="${diary.id}"
-                    class="flex items-center justify-center w-9 h-9 rounded-lg
-                           text-primary hover:bg-surface-container-low transition-colors">
-                    <span class="material-symbols-outlined text-[19px]">schedule</span>
-                </button>
-
             </div>
         `;
     };
@@ -612,18 +620,114 @@
 
     renderPagination(paginationData);
 };
+const openCreateDiaryModal = () => {
+        editingDiaryId = null;
+        document.getElementById('createDiaryModalTitle').textContent = 'Create Diary';
+        document.getElementById('saveCreateDiary').textContent = 'Create Diary';
 
+        const form = document.getElementById('createDiaryForm');
+        form.reset();
+        clearCreateDiaryError();
+
+        document.getElementById('diaryDate').value = getLocalDate();
+        document.getElementById('scheduledAtGroup').classList.add('hidden');
+        document.getElementById('diaryScheduledAt').value = '';
+
+        document.getElementById('createDiaryModal').classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+
+        loadAvailableDiaryAssignments();
+    };
+const openEditDiaryModal = async diary => {
+    editingDiaryId = diary.id;
+
+    const modal = document.getElementById('createDiaryModal');
+    const form = document.getElementById('createDiaryForm');
+    const date = value => value ? String(value).split('T')[0] : '';
+
+    document.getElementById('createDiaryModalTitle').textContent = 'Edit Diary';
+    document.getElementById('saveCreateDiary').textContent = 'Update Diary';
+    clearCreateDiaryError();
+    form.reset();
+
+    document.getElementById('diaryDate').value = date(diary.diary_date);
+    form.elements.namedItem('due_date').value = date(diary.due_date);
+    form.elements.namedItem('classwork').value = diary.classwork || '';
+    form.elements.namedItem('homework').value = diary.homework || '';
+    form.elements.namedItem('instructions').value = diary.instructions || '';
+    document.getElementById('diaryStatus').value = diary.status || 'draft';
+
+    const scheduledGroup = document.getElementById('scheduledAtGroup');
+    const scheduledInput = document.getElementById('diaryScheduledAt');
+
+    scheduledGroup.classList.toggle('hidden', diary.status !== 'scheduled');
+    scheduledInput.required = diary.status === 'scheduled';
+    scheduledInput.value = diary.scheduled_at ? diary.scheduled_at.slice(0, 16) : '';
+
+    modal.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+
+    await loadAvailableDiaryAssignments();
+
+    const assignmentSelect = document.getElementById('diaryAssignment');
+    assignmentSelect.value = String(diary.teacher_assignment_id || '');
+
+    if (assignmentSelect.value !== String(diary.teacher_assignment_id || '')) {
+        console.warn('Existing diary assignment is missing from available assignments.');
+    }
+};
+
+const closeCreateDiaryModal = () => {
+    editingDiaryId = null;
+    document.getElementById('createDiaryModal').classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+};
+
+// Delete Handlers
+const openDeleteModal = diaryId => {
+    deletingDiaryId = diaryId;
+    document.getElementById('deleteConfirmModal').classList.remove('hidden');
+};
+const closeDeleteModal = () => {
+    deletingDiaryId = null;
+    document.getElementById('deleteConfirmModal').classList.add('hidden');
+};
+const confirmDeleteDiary = async () => {
+    if (!deletingDiaryId) return;
+    try {
+        const response = await fetch(`/api/v1/teacher/diaries/${deletingDiaryId}`, {
+            method: 'DELETE',
+            headers
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Failed to delete diary.');
+
+        closeDeleteModal();
+        await loadDiaries(currentPage);
+    } catch (error) {
+        alert(error.message);
+    }
+};
+document.getElementById('diariesTable').addEventListener('click', event => {
+    const button = event.target.closest('[data-action]');
+    if (!button) return;
+    const id = Number(button.dataset.id);
+    const diaries = window.currentDiaries || [];
+    const diary = diaries.find(item => item.id === id);
+    if (!diary) return;
+    if (button.dataset.action === 'publish') publishDiary(diary);
+    if (button.dataset.action === 'schedule') openScheduleModal(diary);
+    if (button.dataset.action === 'edit') openEditDiaryModal(diary);
+    if (button.dataset.action === 'delete') openDeleteModal(diary.id);
+});
     const renderPagination = paginationData => {
     const pagination = document.getElementById('pagination');
-
     if (!paginationData.last_page || paginationData.last_page <= 1) {
         pagination.classList.add('hidden');
         pagination.innerHTML = '';
         return;
     }
-
     pagination.classList.remove('hidden');
-
     pagination.innerHTML = `
         <span class="text-sm text-on-surface-variant">
             Page ${paginationData.current_page} of ${paginationData.last_page}
@@ -948,29 +1052,6 @@ const clearCreateDiaryError = () => {
     errorBox.textContent = '';
     errorBox.classList.add('hidden');
 };
-
-const openCreateDiaryModal = () => {
-    const modal = document.getElementById('createDiaryModal');
-    const form = document.getElementById('createDiaryForm');
-
-    form.reset();
-    clearCreateDiaryError();
-
-    document.getElementById('diaryDate').value = getLocalDate();
-    document.getElementById('scheduledAtGroup').classList.add('hidden');
-    document.getElementById('diaryScheduledAt').value = '';
-
-    modal.classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
-
-    loadAvailableDiaryAssignments();
-};
-
-const closeCreateDiaryModal = () => {
-    document.getElementById('createDiaryModal').classList.add('hidden');
-    document.body.classList.remove('overflow-hidden');
-};
-
 document.getElementById('openCreateDiaryModal').addEventListener('click', event => {
     event.preventDefault();
     openCreateDiaryModal();
@@ -1048,10 +1129,12 @@ document.getElementById('createDiaryForm').addEventListener('submit', async even
         </span>
         Saving...
     `;
-
+    const isEditing = editingDiaryId !== null;
+    const url = isEditing ? `/api/v1/teacher/diaries/${editingDiaryId}` : '/api/v1/teacher/diaries';
+    const method = isEditing ? 'PUT' : 'POST';
     try {
-        const response = await fetch('/api/v1/teacher/diaries', {
-            method: 'POST',
+        const response = await fetch(url, {
+            method: method,
             headers,
             body: JSON.stringify(payload)
         });
@@ -1090,10 +1173,12 @@ document.addEventListener('keydown', event => {
         closeCreateDiaryModal();
     }
 });
+document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteModal);
+document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDeleteDiary);
     loadDiaries(1);
     setInterval(() => {
         loadDiaries(currentPage);
-    }, 10000);
+    }, 30000);
 })();
 </script>
 

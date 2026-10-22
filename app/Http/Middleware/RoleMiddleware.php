@@ -22,7 +22,8 @@ class RoleMiddleware
                 'message' => 'Unauthenticated'
             ],401);
         }
-        if(!in_array($user->role,$roles)){
+        $userRole = $user->role?->slug;
+        if(!in_array($userRole,$roles)){
             return response()->json([
                 'status' => false,
                 'message' => 'Unauthorized'

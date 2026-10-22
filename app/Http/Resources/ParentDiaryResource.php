@@ -10,6 +10,9 @@ class ParentDiaryResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $feedback = $this->parentFeedbacks()
+                    ->where('parent_id', $request->user()->id)
+                    ->first();
         return [
             'id' => $this->id,
             'student' => [
@@ -47,6 +50,9 @@ class ParentDiaryResource extends JsonResource
             'attachments' => DiaryAttachmentResource::collection(
                 $this->whenLoaded('attachments')
             ),
+            'is_completed' => $feedback ? $feedback->is_completed : false,
+            'remarks' => $feedback ? $feedback->remarks : '',
+            'teacher_acknowledged' => $feedback ? $feedback->teacher_acknowledged : false,
         ];
     }
 }
