@@ -22,7 +22,14 @@
             --color-card-bg: #292525;
             --color-text-muted: #A1A1AA;
         }
-
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px var(--color-card-bg) inset !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
         html, body { 
             margin: 0;
             padding: 0;

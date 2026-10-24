@@ -101,7 +101,7 @@
                 <span class="min-w-0 flex-1"><span class="block text-sm font-semibold">Manage Institutes</span><span class="mt-1 block text-xs text-slate-500">Create or update institutes</span></span>
                 <span class="material-symbols-rounded text-slate-400 group-hover:text-primary">chevron_right</span>
             </a>
-            <a href="{{ url('/super-admin/configurations') }}" class="group flex items-center gap-3 rounded-xl border border-slate-200 p-4 transition hover:border-primary/30 hover:bg-blue-50/50">
+            <a href="{{ url('/super-admin/settings') }}" class="group flex items-center gap-3 rounded-xl border border-slate-200 p-4 transition hover:border-primary/30 hover:bg-blue-50/50">
                 <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600"><span class="material-symbols-rounded">settings</span></span>
                 <span class="min-w-0 flex-1"><span class="block text-sm font-semibold">Platform Settings</span><span class="mt-1 block text-xs text-slate-500">Review configuration options</span></span>
                 <span class="material-symbols-rounded text-slate-400 group-hover:text-primary">chevron_right</span>

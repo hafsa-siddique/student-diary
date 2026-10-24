@@ -186,7 +186,10 @@
                     <option value="">Loading sessions...</option>
                 </select>
             </div>
-
+            <div class="sm:col-span-2 flex items-center gap-2 mt-2">
+                <input type="checkbox" id="assignmentInchargeToggle" name="is_incharge" value="1">
+                <label for="assignmentInchargeToggle" class="text-sm text-on-surface">Assign as Class In-charge</label>
+            </div>
             <div class="sm:col-span-2 flex items-center gap-2">
                 <input type="checkbox" id="assignmentStatusToggle" name="status" value="1" checked>
                 <label for="assignmentStatusToggle" class="text-sm text-on-surface">Assignment active</label>
@@ -308,6 +311,7 @@
     const assignmentSubject = $('assignmentSubjectId');
     const assignmentAcademicSession = $('assignmentAcademicSessionId');
     const assignmentStatus = $('assignmentStatusToggle');
+    const assignmentIncharge = $('assignmentInchargeToggle');
     const formError = $('assignTeacherFormError');
     const saveButton = $('saveAssignmentBtn');
     const saveText = $('saveAssignmentText');
@@ -686,6 +690,7 @@
         form.reset();
         editingAssignmentId = null;
         assignmentStatus.checked = true;
+        assignmentIncharge.checked = false;
         $('assignTeacherModalTitle').textContent = 'Add Teacher Assignment';
         $('assignmentModalSubtitle').textContent =
             'Assign a faculty member to a class, section, subject and academic session.';
@@ -758,6 +763,7 @@
             assignmentSubject.value = String(subjectId);
             assignmentAcademicSession.value = String(sessionId);
             assignmentStatus.checked = Number(assignment.status) === 1;
+            assignmentIncharge.checked = Number(assignment.is_incharge) === 1;
 
             loadSections(classId, sectionId);
         } catch (error) {
@@ -778,7 +784,8 @@
             section_id: assignmentSection.value,
             subject_id: assignmentSubject.value,
             academic_session_id: assignmentAcademicSession.value,
-            status: assignmentStatus.checked ? 1 : 0
+            status: assignmentStatus.checked ? 1 : 0,
+            is_incharge: assignmentIncharge.checked ? 1 : 0
         };
 
         if (Object.values(payload).slice(0, 5).some(value => !value)) {

@@ -13,6 +13,7 @@ class TeacherAssignment extends Model
         'class_id',
         'section_id',
         'subject_id',
+        'is_incharge',
         'academic_session_id',
         'status',
     ];

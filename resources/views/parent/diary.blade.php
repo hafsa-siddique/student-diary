@@ -162,7 +162,26 @@
             </div>
 
         </section>
-
+        <!-- Uniform & Cleanliness Daily Report Card -->
+        <div id="cleanlinessReportCard" class="hidden relative overflow-hidden bg-amber-100 rounded-xl shadow-sm p-space-md mb-space-lg border border-outline-variant flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-secondary"></div>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                    <span class="material-symbols-outlined text-[24px]">verified_user</span>
+                </div>
+                <div>
+                    <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">
+                        Uniform & Cleanliness Daily Check
+                    </h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                        Uniform: <strong id="reportUniform" class="text-on-surface">—</strong> | Cleanliness: <strong id="reportCleanliness" class="text-on-surface">—</strong>
+                    </p>
+                </div>
+            </div>
+            
+            <div id="signReportActionContainer">
+            </div>
+        </div>
         <!-- Feed Header -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-space-md">
             <div class="flex flex-col">
@@ -573,7 +592,7 @@ async function changeDate(days) {
 
         renderEntries(entries);
         renderDate();
-
+        await loadCleanlinessReport(newDate);
     } catch (error) {
         console.error('Unable to change diary date:', error);
     } finally {
@@ -604,7 +623,7 @@ async function loadDiary() {
         renderStudent(student);
         renderDate();
         renderEntries(entries);
-
+        await loadCleanlinessReport(getSelectedDate());
         loading.classList.add('hidden');
         content.classList.remove('hidden');
         content.classList.add('flex');
@@ -706,7 +725,74 @@ document.getElementById('nextDay').addEventListener(
     'click',
     () => changeDate(1)
 );
+let currentLoadedReport = null;
 
+async function loadCleanlinessReport(date) {
+    const card = document.getElementById('cleanlinessReportCard');
+    try {
+        const response = await fetchJson(`${API_BASE}/parent/students/${studentId}/daily-reports?date=${date}`);
+        
+        if (response && response.status && response.daily_report) {
+            currentLoadedReport = response.daily_report;
+            renderCleanlinessReport(currentLoadedReport);
+        } else {
+            currentLoadedReport = null;
+            card.classList.add('hidden');
+        }
+    } catch (err) {
+        console.error('Failed to load cleanliness report:', err);
+        card.classList.add('hidden');
+    }
+}
+
+function renderCleanlinessReport(report) {
+    const card = document.getElementById('cleanlinessReportCard');
+    const actionContainer = document.getElementById('signReportActionContainer');
+    if (!report) {
+        card.classList.add('hidden');
+        return;
+    }
+    card.classList.remove('hidden');
+    card.classList.add('flex');
+    document.getElementById('reportUniform').textContent = report.uniform_status || 'Proper';
+    document.getElementById('reportCleanliness').textContent = report.cleanliness_status || 'Good';
+    if (report.parent_signed) {
+        actionContainer.innerHTML = `
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 font-label-md text-label-md font-semibold border border-green-200">
+                <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                Signed
+        `;
+    } else {
+        actionContainer.innerHTML = `
+            <button type="button" onclick="signDailyReport(${report.id})"
+                class="px-4 py-2 rounded-lg bg-primary text-on-primary font-label-md text-label-md font-semibold hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-xs">
+                <span class="material-symbols-outlined text-[18px]">draw</span>
+                Sign & Acknowledge
+            </button>
+        `;
+    }
+}
+
+window.signDailyReport = async function(reportId) {
+    try {
+        const response = await fetch(`${API_BASE}/parent/daily-reports/${reportId}/sign`, {
+            method: 'POST',
+            headers: headers
+        });
+        const result = await response.json();
+
+        if (!response.ok || !result.status) {
+            throw new Error(result.message || 'Failed to sign report.');
+        }
+
+        if (currentLoadedReport) {
+            currentLoadedReport.parent_signed = true;
+            renderCleanlinessReport(currentLoadedReport);
+        }
+    } catch (err) {
+        alert(err.message);
+    }
+};
 loadDiary();
 })();
 </script>

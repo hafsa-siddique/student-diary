@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\InstituteResource;
 use App\Models\Configuration;
 use App\Models\Institute;
+use App\Models\ParentModel;
 use App\Models\Role;
+use App\Models\Student;
+use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -177,5 +180,82 @@ class InstituteController extends Controller
             'message' => 'Institute, admin, and configurations created successfully',
             'data' => new InstituteResource($result)
         ], 201);
+    }
+
+    public function impersonate(Institute $institute)
+    {
+        $adminUser = User::where('institute_id', $institute->id)
+                        ->whereHas('role', function ($q) {
+                            $q->where('name', 'admin'); 
+                        })->first();
+        if (!$adminUser) {
+            $adminUser = User::where('institute_id', $institute->id)->first();
+        }
+        if (!$adminUser) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Is institute ke liye koi admin user nahi mila.'
+            ], 404);
+        }
+        $token = $adminUser->createToken('impersonated_by_super_admin')->plainTextToken;
+
+        return response()->json([
+            'status' => true,
+            'message' => "Switched to {$institute->name} Admin view",
+            'token' => $token,
+            'user' => $adminUser
+        ]);
+    }
+
+    public function impersonateUser(User $user)
+    {
+        $token = $user->createToken('impersonated_by_super_admin')->plainTextToken;
+        return response()->json([
+            'status' => true,
+            'message' => "Switched to {$user->name} ({$user->role}) view",
+            'token' => $token,
+            'user' => $user
+        ]);
+    }
+
+    public function getInstituteUsers($id)
+    {
+        $teachers = Teacher::with('user:id,name,email,status')
+            ->where('institute_id', $id)
+            ->get();
+        $students = Student::with(['user:id,name,email,status', 'parent.user:id,name,email'])
+            ->where('institute_id', $id)
+            ->get();
+        $parents = ParentModel::with('user:id,name,email,status')
+            ->where('institute_id', $id)
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'teachers' => $teachers,
+            'students' => $students,
+            'parents'  => $parents
+        ]);
+    }
+    public function resetPasswordByEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'password' => 'required|string|min:8',
+        ]);
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'The selected email is invalid'
+            ], 404);
+        }
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => "Password for {$user->name} ({$user->email}) reset successfully!"
+        ]);
     }
 }

@@ -221,25 +221,52 @@ document.addEventListener('DOMContentLoaded', () => {
                 row.appendChild(statusCell);
 
                 const actionCell = document.createElement('td');
-                actionCell.className = 'px-6 py-2 text-center';
+                actionCell.className = 'px-6 py-2 text-center relative';
 
-                const viewButton = document.createElement('a');
-                viewButton.href = `/super-admin/institutes/${encodeURIComponent(institute.id)}/view`;
-                viewButton.className = 'inline-flex items-center rounded-lg p-2 text-slate-600 transition hover:text-secondary';
-                viewButton.title = 'View institute';
-                viewButton.setAttribute('aria-label', `View ${institute.name}`);
-                viewButton.innerHTML = '<span class="material-symbols-rounded">visibility</span>';
-                actionCell.appendChild(viewButton);
+                const dropdownWrapper = document.createElement('div');
+                dropdownWrapper.className = 'relative inline-block text-left';
 
-                const statusButton = document.createElement('button');
-                statusButton.type = 'button';
-                statusButton.className = 'ml-1 inline-flex items-center rounded-lg p-2 text-slate-600 transition hover:text-secondary';
-                statusButton.title = isActive ? 'Deactivate institute' : 'Activate institute';
-                statusButton.setAttribute('aria-label', statusButton.title);
-                statusButton.innerHTML = `<span class="material-symbols-rounded">${isActive ? 'person_off' : 'how_to_reg'}</span>`;
-                statusButton.addEventListener('click', () => toggleInstituteStatus(institute, badge, statusButton));
-                actionCell.appendChild(statusButton);
+                const dotsButton = document.createElement('button');
+                dotsButton.type = 'button';
+                dotsButton.className = 'inline-flex items-center justify-center p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition';
+                dotsButton.innerHTML = '<span class="material-symbols-rounded">more_vert</span>';
 
+                const dropdownMenu = document.createElement('div');
+                dropdownMenu.className = 'hidden absolute right-0 mt-2 w-44 rounded-xl bg-white shadow-xl border border-slate-200 z-50 py-1 text-left';
+
+                const viewOption = document.createElement('a');
+                viewOption.href = `/super-admin/institutes/${encodeURIComponent(institute.id)}/view`;
+                viewOption.className = 'w-full flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition';
+                viewOption.innerHTML = '<span class="material-symbols-rounded text-sm text-slate-500">visibility</span> View Details';
+                dropdownMenu.appendChild(viewOption);
+
+                const statusOption = document.createElement('button');
+                statusOption.type = 'button';
+                statusOption.className = 'w-full flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition';
+                statusOption.innerHTML = `<span class="material-symbols-rounded text-sm text-slate-500">${isActive ? 'person_off' : 'how_to_reg'}</span> ${isActive ? 'Deactivate' : 'Activate'}`;
+                statusOption.addEventListener('click', () => {
+                    toggleInstituteStatus(institute, badge, statusOption);
+                    dropdownMenu.classList.add('hidden');
+                });
+                dropdownMenu.appendChild(statusOption);
+
+                const impersonateOption = document.createElement('button');
+                impersonateOption.type = 'button';
+                impersonateOption.className = 'ml-2 inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white transition hover:brightness-110';
+                impersonateOption.innerHTML = '<span class="material-symbols-rounded text-sm">login</span> Login as Admin';
+                impersonateOption.addEventListener('click', () => impersonateInstitute(institute.id));
+                dropdownMenu.appendChild(impersonateOption);
+
+                dotsButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    document.querySelectorAll('.absolute.right-0').forEach(menu => {
+                        if (menu !== dropdownMenu) menu.classList.add('hidden');
+                    });
+                    dropdownMenu.classList.toggle('hidden');
+                });
+                dropdownWrapper.appendChild(dotsButton);
+                dropdownWrapper.appendChild(dropdownMenu);
+                actionCell.appendChild(dropdownWrapper);
                 row.appendChild(actionCell);
                 table.appendChild(row);
             });
@@ -249,7 +276,11 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('instituteCount').textContent = 'Unable to load institutes';
         }
     }
-
+    window.addEventListener('click', () => {
+        document.querySelectorAll('.absolute.right-0').forEach(menu => {
+            menu.classList.add('hidden');
+        });
+    });
     loadInstitutes();
     async function toggleInstituteStatus(institute, badge, button) {
         const token = localStorage.getItem('student_diary_token');
@@ -343,6 +374,38 @@ function showToast(message, isError = false) {
     setTimeout(() => {
         toast.className = 'fixed bottom-5 right-5 z-50 hidden transform translate-y-2 opacity-0 transition-all duration-300 flex items-center gap-3 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl border border-slate-700';
     }, 3500);
+}
+async function impersonateInstitute(instituteId) {
+    const token = localStorage.getItem('student_diary_token');
+    
+    try {
+        const response = await fetch(`/api/v1/super-admin/institutes/${instituteId}/impersonate`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.status) {
+            throw new Error(result.message || 'Failed to impersonate institute admin.');
+        }
+        localStorage.setItem('backup_super_admin_token', token);
+        localStorage.setItem('student_diary_token', result.token);
+        localStorage.setItem('student_diary_user', JSON.stringify(result.user));
+        localStorage.setItem('is_impersonating', 'true');
+
+        showToast('Successfully switched to institute admin view!');
+                setTimeout(() => {
+            window.location.href = '/admin/dashboard'; 
+        }, 800);
+
+    } catch (error) {
+        console.error(error);
+        showToast(error.message, true);
+    }
 }
 </script>
 @endsection

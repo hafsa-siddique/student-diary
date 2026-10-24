@@ -8,7 +8,9 @@ use App\Http\Resources\ParentDiaryResource;
 use App\Models\DiaryAttachment;
 use App\Models\DiaryEntry;
 use App\Models\DiaryParentFeedback;
+use App\Models\ParentModel;
 use App\Models\Student;
+use App\Models\StudentDailyReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -243,6 +245,52 @@ class DiaryController extends Controller
             'status' => true,
             'message' => 'Feedback saved successfully.',
             'data' => $feedback,
+        ]);
+    }
+    public function getStudentDailyReports(Request $request, Student $student)
+    {
+        $user = $request->user();
+
+        $isParentOfStudent = false;
+        $parentRecord = ParentModel::where('user_id', $user->id)->first();
+        if ($parentRecord) {
+            $isParentOfStudent = ($student->parent_id == $parentRecord->id);
+        }
+        if (!$isParentOfStudent && $user->role !== 'admin' && $user->role !== 'super_admin') {
+            return response()->json([
+                'status' => false,
+                'message' => 'Unauthorized access to student reports.'
+            ], 403);
+        }
+        $date = $request->query('date', today()->toDateString());
+
+        $dailyReport = StudentDailyReport::where('student_id', $student->id)
+            ->where('report_date', $date)
+            ->first();
+
+        return response()->json([
+            'status' => true,
+            'student' => $student,
+            'report_date' => $date,
+            'daily_report' => $dailyReport
+        ]);
+    }
+    public function signDailyReport(Request $request, StudentDailyReport $report)
+    {
+        if ($report->parent_signed) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Report is already signed.'
+            ]);
+        }
+        $report->update([
+            'parent_signed' => true,
+            'parent_signed_at' => now(),
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Report signed and acknowledged successfully.'
         ]);
     }
 }

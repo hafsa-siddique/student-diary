@@ -494,7 +494,31 @@
         </form>
     </div>
 </div>
+<!-- Center Popup Modal (Initial View) -->
+<div id="announcementPopup" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 text-slate-800 relative animate-scale-up">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+            <div class="flex items-center gap-2 text-amber-600">
+                <span class="material-symbols-outlined">campaign</span>
+                <h3 class="font-bold text-slate-800 text-sm">Today's Important Announcement</h3>
+            </div>
+            <button type="button" onclick="minimizeAnnouncement()" class="text-slate-400 hover:text-slate-600">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="py-2">
+            <p id="popupMessageContent" class="text-sm text-slate-700 leading-relaxed whitespace-pre-line"></p>
+        </div>
+        <div class="flex justify-end pt-3 border-t border-slate-100">
+            <button type="button" onclick="minimizeAnnouncement()" class="px-4 py-2 rounded-xl bg-primary text-xs font-semibold text-white hover:brightness-110">Got it</button>
+        </div>
+    </div>
+</div>
 
+<!-- Floating Side Icon (Minimized View) -->
+<button id="floatingAnnouncementIcon" onclick="openAnnouncementPopup()" class="fixed bottom-6 right-6 z-40 hidden flex items-center gap-2 rounded-full bg-secondary px-4 py-3 text-white shadow-lg hover:brightness-110 transition animate-bounce">
+    <span class="material-symbols-outlined text-xl">campaign</span>
+</button>
 <script>
 (async() => {
     const token = localStorage.getItem('student_diary_token');
@@ -885,6 +909,30 @@
             closeCreateDiaryModal();
         }
     });
+    async function checkTodayAnnouncement() {
+        try {
+            const response = await fetch('/api/v1/user/active-announcement', {
+                headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
+            });
+            const result = await response.json();
+            if (response.ok && result.data && result.data.message) {
+                const msgBox = document.getElementById('popupMessageContent');
+                if (msgBox) msgBox.textContent = result.data.message;
+                const user = JSON.parse(localStorage.getItem('student_diary_user') || '{}');
+                const userId = user.id || 'guest';
+                const todayDate = new Date().toISOString().split('T')[0];
+                const dismissedDate = localStorage.getItem(`announcement_dismissed_date_${userId}`);
+                
+                if (dismissedDate !== todayDate) {
+                    document.getElementById('announcementPopup')?.classList.remove('hidden');
+                } else {
+                    document.getElementById('floatingAnnouncementIcon')?.classList.remove('hidden');
+                }
+            }
+        } catch (err) {
+            console.error('Failed to load announcement', err);
+        }
+    }
     try {
         setGreeting();
 
@@ -930,6 +978,7 @@
 
         renderDiaries(diariesResult.data?.data || diariesResult.data || []);
         renderAssignments(assignmentsResult.data || []);
+        await checkTodayAnnouncement();
         setInterval(async () => {
         try {
             const diariesResult = await fetchApi('/api/v1/teacher/diaries');
@@ -981,6 +1030,19 @@
         `;
     }
 })();
+function minimizeAnnouncement() {
+    document.getElementById('announcementPopup')?.classList.add('hidden');
+    document.getElementById('floatingAnnouncementIcon')?.classList.remove('hidden');
+    const user = JSON.parse(localStorage.getItem('student_diary_user') || '{}');
+    const userId = user.id || 'guest';
+    const todayDate = new Date().toISOString().split('T')[0];
+    localStorage.setItem(`announcement_dismissed_date_${userId}`, todayDate);
+}
+
+function openAnnouncementPopup() {
+    document.getElementById('floatingAnnouncementIcon')?.classList.add('hidden');
+    document.getElementById('announcementPopup')?.classList.remove('hidden');
+}
 </script>
 
 @endsection

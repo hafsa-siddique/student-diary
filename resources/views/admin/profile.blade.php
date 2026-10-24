@@ -411,6 +411,7 @@ async function updatePassword() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', loadProfile);
+loadProfile(); 
+
 </script>
 @endsection

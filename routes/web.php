@@ -53,6 +53,8 @@ Route::view('/teacher/scheduledDiaries', 'teacher.diaries.scheduled-diaries')
     ->name('teacher.scheduled-diaries');    
 Route::view('/teacher/classes-review', 'teacher.classes-review')
     ->name('teacher.classes-review');       
+Route::view('/teacher/daily-reports', 'teacher.daily-reports')
+    ->name('teacher.daily-reports');       
 
 Route::view('/parent/dashboard', 'parent.dashboard')
     ->name('parent.dashboard');    

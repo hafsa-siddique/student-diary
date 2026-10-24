@@ -82,6 +82,9 @@
                 <a href="{{ url('/super-admin/settings') }}" class="nav-link {{ request()->is('super-admin/settings*') ? 'active' : '' }} flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-white">
                     <span class="material-symbols-rounded">tune</span> Platform Settings
                 </a>
+                <a href="#" onclick="openGlobalResetModal(); return false;" class="nav-link flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-white">
+                    <span class="material-symbols-rounded">lock_reset</span> Reset Password
+                </a>
             </nav>
         </div>
 
@@ -205,6 +208,193 @@
     });
     instituteSearch.addEventListener('keydown', event => {
         if (event.key === 'Escape') searchResults.classList.add('hidden');
+    });
+</script>
+<div id="globalResetPasswordModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 text-slate-800">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+            <h3 class="font-bold text-slate-800 text-sm">Reset Any User Password</h3>
+            <button type="button" onclick="closeGlobalResetModal()" class="text-slate-400 hover:text-slate-600">
+                <span class="material-symbols-rounded">close</span>
+            </button>
+        </div>
+        <div id="modalErrorMessage" class="hidden mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-medium flex items-center gap-2">
+            <span class="material-symbols-rounded text-base">error</span>
+            <span id="modalErrorText"></span>
+        </div>
+        <form onsubmit="submitGlobalPasswordReset(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">User Email *</label>
+                <input type="email" id="reset_user_email" required placeholder="user@institute.com" class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm text-slate-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/10">
+            </div>
+            <div>
+                <div class="flex justify-between items-center mb-1">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500">System Generated Password *</label>
+                </div>
+                <div class="relative flex items-center">
+                    <input type="password" id="reset_new_password" required class="w-full rounded-xl border border-slate-200 px-3.5 py-2 pr-10 text-sm text-slate-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/10">
+                    <button type="button" id="toggleResetPassword" class="absolute right-3 text-slate-400 hover:text-slate-600 flex items-center">
+                        <span id="resetPasswordIcon" class="material-symbols-rounded text-xl">visibility</span>
+                    </button>
+                </div>
+            </div>
+            <div class="rounded-xl bg-slate-50 border border-slate-200 p-3.5 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-600">Shareable Details</span>
+                    <button type="button" onclick="copyAllDetails()" class="text-xs font-semibold text-primary hover:underline flex items-center gap-1 bg-white border border-slate-200 px-2.5 py-1 rounded-lg shadow-sm">
+                        <span class="material-symbols-rounded text-sm">content_copy</span> Copy Details
+                    </button>
+                </div>
+                <div class="text-xs text-slate-700 space-y-1 font-mono bg-white p-2.5 rounded-lg border border-slate-100">
+                    <div><span class="text-slate-400 font-sans">Email:</span> <span id="preview_email">Not entered yet</span></div>
+                    <div><span class="text-slate-400 font-sans">Password:</span> <span id="preview_password">---------</span></div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="closeGlobalResetModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+                <button type="submit" class="px-4 py-2 rounded-xl bg-primary text-xs font-semibold text-white hover:brightness-110">Reset Password</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function generateRandomPassword() {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$!";
+        let password = "";
+        for (let i = 0; i < 10; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return password;
+    }
+    function showModalMessage(message, type = 'error') {
+        const errorDiv = document.getElementById('modalErrorMessage');
+        const errorText = document.getElementById('modalErrorText');
+        const iconSpan = errorDiv.querySelector('.material-symbols-rounded');
+        errorText.textContent = message;     
+        if (type === 'success') {
+            errorDiv.className = "mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium flex items-center gap-2";
+            iconSpan.textContent = "check_circle";
+        } else {
+            errorDiv.className = "mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-medium flex items-center gap-2";
+            iconSpan.textContent = "error";
+        }
+        errorDiv.classList.remove('hidden');
+    }
+    function openGlobalResetModal() {
+        const emailInput = document.getElementById('reset_user_email');
+        const passwordInput = document.getElementById('reset_new_password');
+        emailInput.value = '';
+        const genPassword = generateRandomPassword();
+        passwordInput.value = genPassword;
+        document.getElementById('preview_email').textContent = 'Not entered yet';
+        document.getElementById('preview_password').textContent = genPassword;
+        passwordInput.type = 'password';
+        document.getElementById('resetPasswordIcon').textContent = 'visibility';
+        document.getElementById('modalErrorMessage').classList.add('hidden');
+        document.getElementById('globalResetPasswordModal').classList.remove('hidden');
+    }
+
+    function closeGlobalResetModal() {
+        document.getElementById('globalResetPasswordModal').classList.add('hidden');
+    }
+    document.getElementById('reset_user_email').addEventListener('input', function() {
+        const emailValue = this.value.trim();
+        const previewEmail = document.getElementById('preview_email');
+        if (emailValue) {
+            previewEmail.textContent = emailValue;
+        } else {
+            previewEmail.textContent = 'Not entered yet';
+        }
+    });
+   document.getElementById('toggleResetPassword').addEventListener('click', () => {
+        const passwordInput = document.getElementById('reset_new_password');
+        const passwordIcon = document.getElementById('resetPasswordIcon');
+        const isVisible = passwordInput.type === 'text';
+        passwordInput.type = isVisible ? 'password' : 'text';
+        passwordIcon.textContent = isVisible ? 'visibility' : 'visibility_off';
+    });
+    function copyAllDetails() {
+        const email = document.getElementById('reset_user_email').value.trim();
+        const password = document.getElementById('reset_new_password').value;
+        if (!email) {
+            showModalMessage('Enter User Email','error');
+            return;
+        }
+        const textToCopy = `Login Details:\nEmail: ${email}\nPassword: ${password}`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showModalMessage('Email & Password Are Copied Successfully.','success');
+            }).catch(err => {
+                fallbackCopyText(textToCopy);
+            });
+        } else {
+            fallbackCopyText(textToCopy);
+        }    
+    }
+    function fallbackCopyText(text) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                showModalMessage('Email & Password Are Copied Successfully.','success');
+            } else {
+                showModalMessage('Could not copy. Please select and copy it yourself.','error');
+            }
+        } catch (err) {
+            showModalMessage('Browser does not support copying.','error');
+        }
+        
+        document.body.removeChild(textArea);
+    }
+    async function submitGlobalPasswordReset(e) {
+        e.preventDefault();
+        const errorDiv = document.getElementById('modalErrorMessage');
+        const errorText = document.getElementById('modalErrorText');
+        errorDiv.classList.add('hidden');
+        const token = localStorage.getItem('student_diary_token');
+        const email = document.getElementById('reset_user_email').value;
+        const password = document.getElementById('reset_new_password').value;
+        
+        try {
+            const response = await fetch('/api/v1/super-admin/users/reset-by-email', {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'Accept': 'application/json', 
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ email, password })
+            });
+            
+            const result = await response.json();
+            if (!response.ok) {
+                let errorMsg = 'Failed to reset password.';
+                if (result.errors && result.errors.email) {
+                    errorMsg = result.errors.email[0];
+                } else if (result.message) {
+                    errorMsg = result.message;
+                }
+                throw new Error(errorMsg);
+            }
+            closeGlobalResetModal();
+            
+        } catch (err) {
+            errorText.textContent = err.message;
+            errorDiv.classList.remove('hidden');
+        }
+    }
+    // Keep password preview synced if password changes
+    document.getElementById('reset_new_password').addEventListener('input', function() {
+        document.getElementById('preview_password').textContent = this.value;
     });
 </script>
 </body>

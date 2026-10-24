@@ -71,6 +71,7 @@ class TeacherAssignmentController extends Controller
             'subject_id' => 'required|exists:subjects,id',
             'academic_session_id' => 'required|exists:academic_sessions,id',
             'status' => 'sometimes|boolean',
+            'is_incharge' => 'sometimes|boolean',
         ]);
         $teacher = Teacher::where('id', $validatedData['teacher_id'])
             ->where('institute_id', $instituteId)
@@ -158,6 +159,7 @@ class TeacherAssignmentController extends Controller
             'subject_id' => $subject->id,
             'academic_session_id' => $academicSession->id,
             'status' => $validatedData['status'] ?? true,
+            'is_incharge' => $validatedData['is_incharge'] ?? false,
         ]);
 
         $assignment->load([
@@ -217,6 +219,7 @@ class TeacherAssignmentController extends Controller
             'section_id' => 'required|exists:sections,id',
             'subject_id' => 'required|exists:subjects,id',
             'academic_session_id' => 'required|exists:academic_sessions,id',
+            'is_incharge' => 'sometimes|boolean',
         ]);
 
         $teacher = Teacher::where('id', $validatedData['teacher_id'])
@@ -291,6 +294,7 @@ class TeacherAssignmentController extends Controller
             'section_id' => $section->id,
             'subject_id' => $subject->id,
             'academic_session_id' => $academicSession->id,
+            'is_incharge' => $validatedData['is_incharge'] ?? $teacherAssignment->is_incharge,
         ]);
         $teacherAssignment->load([
             'teacher.user',

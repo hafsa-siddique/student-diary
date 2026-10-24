@@ -208,6 +208,19 @@
 </head>
 
 <body class="bg-surface font-body-md text-on-surface antialiased">
+    <!-- Impersonation Mode Banner -->
+    <div id="impersonationBanner" class="hidden fixed top-0 left-0 right-0 z-50 bg-black px-4 py-2 text-white shadow-md transition-all">
+        <div class="container mx-auto flex flex-wrap items-center justify-between gap-2 text-sm font-medium">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined">warning</span>
+                <span>You are now in <strong>Impersonation Mode (Admin View)</strong>.</span>
+            </div>
+            <button type="button" onclick="exitImpersonationMode()" class="flex items-center gap-1 rounded-lg bg-white px-3 py-1 font-semibold text-black transition">
+                <span class="material-symbols-outlined text-base">logout</span>
+                Exit & Return to Super Admin
+            </button>
+        </div>
+    </div>
     <div id="admin-sidebar-backdrop" class="fixed inset-0 bg-black/40 z-40 hidden lg:hidden"></div>
 
     <!-- Sidebar Navigation -->
@@ -251,7 +264,10 @@
                     <span class="material-symbols-outlined text-[20px]">dashboard</span>
                     <span class="font-body-md text-body-md">Dashboard</span>
                 </a>
-
+                <a onclick="openAnnouncementModal(); return false;" class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-primary-container hover:bg-primary hover:text-on-primary transition-colors hover:brightness-110" data-spa-link href="">
+                    <span class="material-symbols-outlined text-[20px]">campaign</span>
+                    <span class="font-body-md text-body-md">Publish Announcement</span>
+                </a>
                 <div class="px-space-sm pt-space-md pb-1">
                     <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-primary-container/80">People</span>
                 </div>
@@ -321,8 +337,7 @@
                 <span class="font-body-md text-body-md">Logout</span>
             </button>
         </div>
-    </aside>
-
+    </aside> 
     <!-- Main Content Shell -->
     <div class="lg:pl-60 min-h-screen flex flex-col">
         <!-- Top Navbar -->
@@ -355,7 +370,31 @@
                 </div>
             </div>
         </header>
+        <!-- Announcement Modal -->
+        <div id="announcementModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+            <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 text-slate-800">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-[20px]">campaign</span>
+                        Publish Daily Announcement
+                    </h3>
+                    <button type="button" onclick="closeAnnouncementModal()" class="text-slate-400 hover:text-slate-600">
+                        <span class="material-symbols-outlined text-[20px]">close</span>
+                    </button>
+                </div>
 
+                <form onsubmit="publishAnnouncement(event)" class="space-y-4">
+                    <div>
+                        <textarea id="admin_announcement_msg" required rows="4" placeholder="Today's Announcement" class="w-full rounded-xl border border-slate-200 p-3.5 text-sm text-slate-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"></textarea>
+                    </div>
+                    
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" onclick="closeAnnouncementModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+                        <button type="submit" class="px-4 py-2 rounded-xl bg-primary text-xs font-semibold text-white hover:brightness-110">Publish for Today</button>
+                    </div>
+                </form>
+            </div>
+        </div>
         <main id="spaContent" class="w-full pt-20 lg:pt-16 px-4 lg:px-margin-desktop pb-8 lg:pb-margin-desktop flex-1">
             @yield('content')
         </main>
@@ -808,6 +847,78 @@
 
         updateActiveSidebar();
     })();
+    document.addEventListener('DOMContentLoaded', () => {
+        const isImpersonating = localStorage.getItem('is_impersonating');
+        const banner = document.getElementById('impersonationBanner');
+        const header = document.querySelector('header');
+        const sidebar = document.getElementById('admin-sidebar');
+        const mainContent = document.getElementById('spaContent');
+        if (isImpersonating === 'true' && banner) {
+            banner.classList.remove('hidden');
+            if (header) header.style.top = '41px'; 
+            if (sidebar) sidebar.style.top = '41px';
+            if (sidebar) sidebar.style.height = 'calc(100vh - 41px)';
+            if (mainContent) mainContent.style.paddingTop = '95px';
+        }
+    });
+    function exitImpersonationMode() {
+        const backupToken = localStorage.getItem('backup_super_admin_token');
+
+        if (backupToken) {
+            localStorage.setItem('student_diary_token', backupToken);
+            localStorage.removeItem('backup_super_admin_token');
+            localStorage.removeItem('is_impersonating');
+
+            setTimeout(() => {
+                window.location.href = '/super-admin/institutes'; 
+            }, 300);
+        } else {
+            alert('Super admin backup session missing.');
+            window.location.href = '/login';
+        }
+    }
+    function openAnnouncementModal() {
+        const msgBox = document.getElementById('admin_announcement_msg');
+        if (msgBox) msgBox.value = '';
+        const modal = document.getElementById('announcementModal');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeAnnouncementModal() {
+        const modal = document.getElementById('announcementModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    async function publishAnnouncement(e) {
+        e.preventDefault();
+        const messageInput = document.getElementById('admin_announcement_msg');
+        if (!messageInput) return;
+        
+        const message = messageInput.value;
+        const token = localStorage.getItem('student_diary_token');
+
+        try {
+            const response = await fetch('/api/v1/admin/announcements', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ message })
+            });
+            
+            const result = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(result.message || 'Failed to publish announcement.');
+            }
+            closeAnnouncementModal();
+            
+        } catch (err) {
+            alert(err.message);
+        }
+    }
     </script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\v1\Admin\AcademicSessionController;
+use App\Http\Controllers\API\v1\Admin\AnnouncementController;
 use App\Http\Controllers\API\v1\Admin\ClassController;
 use App\Http\Controllers\API\v1\Admin\ClassSubjectController;
 use App\Http\Controllers\API\v1\Admin\ParentController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\API\v1\SuperAdmin\ConfigurationController;
 use App\Http\Controllers\API\v1\SuperAdmin\InstituteAdminController;
 use App\Http\Controllers\API\v1\SuperAdmin\InstituteController;
 use App\Http\Controllers\API\v1\SuperAdmin\PlatformSettingController;
+use App\Http\Controllers\API\v1\Teacher\CleanlinessReportController;
 use App\Http\Controllers\API\v1\Teacher\DiaryAttachmentController;
 use App\Http\Controllers\API\v1\Teacher\DiaryEntryController;
 use App\Http\Controllers\API\v1\Teacher\TeacherController as TeacherTeacherController;
@@ -36,12 +38,18 @@ Route::prefix('v1')->group(function (){
     Route::middleware('auth:sanctum')->group(function (){
         Route::post('/logout',[AuthController::class,'logout']);
         Route::get('/me',[AuthController::class,'me']);
+        Route::get('/user/active-announcement', [AnnouncementController::class, 'getActiveAnnouncement']);
+
     });
 
     Route::middleware(['auth:sanctum','role:super_admin'])->group(function (){
+        Route::put('super-admin/users/reset-by-email', [InstituteController::class, 'resetPasswordByEmail']);
+        Route::post('super-admin/users/{user}/impersonate', [InstituteController::class, 'impersonateUser']);
+        Route::post('super-admin/institutes/{institute}/impersonate', [InstituteController::class, 'impersonate']);
         Route::post('super-admin/institutes/complete', [InstituteController::class, 'storeInstituteWithAdmin']);
         Route::apiResource('super-admin/institutes',InstituteController::class);
         Route::patch('super-admin/institutes/{institute}/status',[InstituteController::class,'updateStatus']);
+        Route::get('super-admin/institutes/{institute}/users', [InstituteController::class, 'getInstituteUsers']);
         Route::get('super-admin/institutes/{institute}/configuration',[ConfigurationController::class,'show']);
         Route::put('super-admin/institutes/{institute}/configuration',[ConfigurationController::class,'update']);
         Route::get('super-admin/institutes/{institute}/admin',[InstituteAdminController::class,'show']);
@@ -96,6 +104,7 @@ Route::prefix('v1')->group(function (){
         Route::patch('admin/teacher-assignments/{teacherAssignment}/status',[TeacherAssignmentController::class, 'updateStatus']);
         Route::get('admin/teachers/{teacher}/assignments',[TeacherAssignmentController::class, 'teacherAssignments']);
         Route::get('admin/classes/{class}/teacher-assignments',[TeacherAssignmentController::class, 'classAssignments']);
+        Route::post('admin/announcements', [AnnouncementController::class, 'store']);
 
     });
 
@@ -114,6 +123,8 @@ Route::prefix('v1')->group(function (){
         Route::delete('teacher/diaries/{diary}/attachments/{attachment}',[DiaryAttachmentController::class,'destroy']);
         Route::get('teacher/assignments/{assignment}/homework-review', [TeacherHomeworkReviewController::class, 'getStudentsHomeworkReview']);
         Route::post('teacher/feedbacks/{feedback}/acknowledge', [TeacherHomeworkReviewController::class, 'acknowledge']);
+        Route::get('teacher/incharge-students', [CleanlinessReportController::class, 'getInchargeClassStudents']);
+        Route::post('teacher/daily-reports', [CleanlinessReportController::class, 'storeReports']);
 
     });
 
@@ -126,10 +137,11 @@ Route::prefix('v1')->group(function (){
         Route::post('parent/change-password',[ParentParentController::class,'changePassword']);
         Route::get('parent/children',[ParentParentController::class,'children']);
         Route::get('parent/students/{student}/diaries',[DiaryController::class, 'studentDiaries']);
+        Route::get('parent/students/{student}/daily-reports', [DiaryController::class, 'getStudentDailyReports']);
         Route::get('parent/diaries/{diary}',[DiaryController::class, 'show']);
         Route::get('parent/diaries/{diary}/attachments',[DiaryController::class, 'attachments']);
         Route::get('parent/diaries/{diary}/attachments/{attachment}/download',[DiaryController::class, 'downloadAttachment']);
         Route::post('parent/diaries/{diary}/feedback',[DiaryController::class,'updateFeedback']);
-        
+        Route::post('parent/daily-reports/{report}/sign', [DiaryController::class, 'signDailyReport']);
     });
 });

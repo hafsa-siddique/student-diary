@@ -251,6 +251,19 @@
     </script>
 </head>
 <body class="bg-surface font-body-md text-on-surface antialiased">
+ <!-- Impersonation Mode Banner -->
+<div id="impersonationBanner" class="hidden fixed top-0 left-0 right-0 z-50 bg-black px-4 py-2 text-white shadow-md transition-all">
+    <div class="container mx-auto flex flex-wrap items-center justify-between gap-2 text-sm font-medium">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined">warning</span>
+            <span>You are now in <strong>Impersonation Mode (Teacher View)</strong>.</span>
+        </div>
+        <button type="button" onclick="exitImpersonationMode()" class="flex items-center gap-1 rounded-lg bg-white px-3 py-1 font-semibold text-black transition">
+            <span class="material-symbols-outlined text-base">logout</span>
+            Exit & Return to Super Admin
+        </button>
+    </div>
+</div>
 <div id="teacher-sidebar-backdrop" class="fixed inset-0 bg-black/40 z-40 hidden lg:hidden"></div>
     <!-- Sidebar Navigation -->
         <aside id="teacher-sidebar" class="fixed left-0 top-0 h-screen w-60 bg-primary z-50 flex flex-col justify-between overflow-y-auto shadow-[0_1px_8px_rgba(0,0,0,0.08)] -translate-x-full transition-transform duration-200 lg:translate-x-0">        <div class="flex flex-col">
@@ -315,6 +328,10 @@
                 <a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-primary-container hover:bg-primary hover:text-on-primary transition-colors hover:brightness-110" data-path="classes" data-spa-link href="/teacher/classes-review">
                     <span class="material-symbols-outlined text-[20px]">assignment_turned_in</span>
                     <span class="font-body-md text-body-md">Classes Review</span>
+                </a>
+                <a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-primary-container hover:bg-primary hover:text-on-primary transition-colors hover:brightness-110" data-path="classes" data-spa-link href="/teacher/daily-reports">
+                    <span class="material-symbols-outlined text-[20px]">checklist</span>
+                    <span class="font-body-md text-body-md">Uniform & Cleanliness</span>
                 </a>
         </div>
         <div class="px-space-xs py-space-sm bg-primary flex flex-col gap-1">
@@ -862,6 +879,36 @@
             );
 
     })();
+    document.addEventListener('DOMContentLoaded', () => {
+        const isImpersonating = localStorage.getItem('is_impersonating');
+        const banner = document.getElementById('impersonationBanner');
+        const header = document.querySelector('header');
+        const sidebar = document.getElementById('teacher-sidebar');
+        const mainContent = document.getElementById('spaContent');
+        if (isImpersonating === 'true' && banner) {
+            banner.classList.remove('hidden');
+            if (header) header.style.top = '41px'; 
+            if (sidebar) sidebar.style.top = '41px';
+            if (sidebar) sidebar.style.height = 'calc(100vh - 41px)';
+            if (mainContent) mainContent.style.paddingTop = '95px';
+        }
+    });
+    function exitImpersonationMode() {
+        const backupToken = localStorage.getItem('backup_super_admin_token');
+
+        if (backupToken) {
+            localStorage.setItem('student_diary_token', backupToken);
+            localStorage.removeItem('backup_super_admin_token');
+            localStorage.removeItem('is_impersonating');
+
+            setTimeout(() => {
+                window.location.href = '/super-admin/institutes'; 
+            }, 300);
+        } else {
+            alert('Super admin backup session missing.');
+            window.location.href = '/login';
+        }
+    }
     </script>
 </body>
 </html>
